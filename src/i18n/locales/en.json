@@ -1,0 +1,19 @@
+{
+  "hero": {
+    "slide1": {
+      "title": "Bridging Japan and India",
+      "description": "Connecting two vibrant tech ecosystems through innovation and collaboration.",
+      "button": "Discover Our Services"
+    },
+    "slide2": {
+      "title": "Global Tech Solutions",
+      "description": "Delivering cutting-edge technology services across borders.",
+      "button": "Discover Our Services"
+    },
+    "slide3": {
+      "title": "Innovation Without Boundaries",
+      "description": "Creating digital solutions that transcend geographical limitations.",
+      "button": "Discover Our Services"
+    }
+  }
+} 

@@ -13,8 +13,25 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 5000;
 
-// Middleware
-app.use(cors());
+// CORS configuration for production
+const allowedOrigins = [
+  'https://oryfolks-website.vercel.app',
+  'https://oryfolks.com',
+  'https://www.oryfolks.com',
+  'http://localhost:5173' // for local development
+];
+
+app.use(cors({
+  origin: function(origin, callback) {
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true
+}));
+
 app.use(express.json());
 
 // Create uploads directory if it doesn't exist
@@ -51,23 +68,34 @@ const upload = multer({
 });
 
 // MongoDB Connection
-const MONGODB_URI = 'mongodb+srv://ravurimadan:aMF8kLkyshHszuHy@oryfolks.obbgnyd.mongodb.net/oryfolks?retryWrites=true&w=majority';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://ravurimadan:aMF8kLkyshHszuHy@oryfolks.obbgnyd.mongodb.net/oryfolks?retryWrites=true&w=majority';
 
-mongoose.connect(MONGODB_URI, {
-  serverSelectionTimeoutMS: 5000,
-  socketTimeoutMS: 45000,
-})
-  .then(() => console.log('Connected to MongoDB Atlas'))
-  .catch((err) => console.error('MongoDB connection error:', err));
+// Improved MongoDB connection with better error handling
+const connectDB = async () => {
+  try {
+    await mongoose.connect(MONGODB_URI, {
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
+    });
+    console.log('Connected to MongoDB Atlas');
+  } catch (err) {
+    console.error('MongoDB connection error:', err);
+    // Retry connection after 5 seconds
+    setTimeout(connectDB, 5000);
+  }
+};
+
+connectDB();
 
 // Resume Routes
-app.post('/api/resume', upload.single('resumeFile'), async (req: Request & { file?: Express.Multer.File }, res: Response) => {
+app.post('/api/resume', upload.single('resumeFile'), async (req: Request, res: Response): Promise<void> => {
   try {
     console.log('Received resume data:', req.body);
     console.log('Received file:', req.file);
 
     if (!req.file) {
-      return res.status(400).json({ message: 'Resume file is required' });
+      res.status(400).json({ message: 'Resume file is required' });
+      return;
     }
 
     const resumeData = {
@@ -120,6 +148,17 @@ app.get('/api/contact', async (req, res) => {
   } catch (error: any) {
     res.status(500).json({ message: error.message });
   }
+});
+
+// Add a health check endpoint
+app.get('/health', (req: Request, res: Response) => {
+  res.status(200).json({ status: 'ok' });
+});
+
+// Error handling middleware
+app.use((err: Error, req: Request, res: Response, next: Function) => {
+  console.error(err.stack);
+  res.status(500).json({ message: 'Something went wrong!' });
 });
 
 app.listen(port, () => {

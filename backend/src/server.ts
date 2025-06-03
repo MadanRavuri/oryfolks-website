@@ -71,7 +71,7 @@ const upload = multer({
 });
 
 // MongoDB Connection
-const MONGODB_URI = 'mongodb+srv://ravurimadan:aMF8kLkyshHszuHy@oryfolks.obbgnyd.mongodb.net/oryfolks?retryWrites=true&w=majority';
+const MONGODB_URI = process.env.MONGODB_URI as string; // Get from environment variables
 
 mongoose.connect(MONGODB_URI, {
   serverSelectionTimeoutMS: 5000,
@@ -149,6 +149,7 @@ app.get('/api/contact', async (req, res) => {
   }
 });
 
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
-}); 
+// Start the server
+// app.listen(port, () => {
+//   console.log(`Server is running on port ${port}`);
+// }); 

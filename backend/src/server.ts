@@ -76,7 +76,6 @@ const MONGODB_URI = process.env.MONGODB_URI as string; // Get from environment v
 mongoose.connect(MONGODB_URI, {
   serverSelectionTimeoutMS: 5000,
   socketTimeoutMS: 45000,
-  bufferTimeoutMS: 30000,
 })
   .then(() => console.log('Connected to MongoDB Atlas'))
   .catch((err) => console.error('MongoDB connection error:', err));

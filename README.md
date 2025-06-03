@@ -120,4 +120,4 @@ Madan Ravuri - [GitHub](https://github.com/MadanRavuri)
 
 Project Link: [https://github.com/MadanRavuri/oryfolks-website](https://github.com/MadanRavuri/oryfolks-website)
 
-// Triggering a new deployment 
+// Triggering another deployment to test MongoDB connection after updating Atlas IP whitelist 

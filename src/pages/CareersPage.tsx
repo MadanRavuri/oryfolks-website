@@ -7,6 +7,7 @@ import Section from '../components/Section';
 import Card from '../components/Card';
 import Button from '../components/Button';
 import { useNavigate } from 'react-router-dom';
+import config from '../config';
 
 const CareersPage = () => {
   const { t } = useTranslation();
@@ -48,7 +49,7 @@ const CareersPage = () => {
         }
       });
 
-      const response = await fetch('http://localhost:5000/api/resume', {
+      const response = await fetch(`${config.apiUrl}/resume`, {
         method: 'POST',
         body: formDataToSend,
       });

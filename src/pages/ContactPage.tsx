@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import Hero from '../components/Hero';
 import Section from '../components/Section';
 import Button from '../components/Button';
+import config from '../config';
 
 const ContactPage = () => {
   const [formData, setFormData] = useState({
@@ -29,7 +30,10 @@ const ContactPage = () => {
     setError(null);
     
     try {
-      const response = await fetch('http://localhost:5000/api/contact', {
+      console.log('Submitting form to:', `${config.apiUrl}/contact`);
+      console.log('Form data:', formData);
+
+      const response = await fetch(`${config.apiUrl}/contact`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -37,8 +41,11 @@ const ContactPage = () => {
         body: JSON.stringify(formData),
       });
 
+      const data = await response.json();
+      console.log('Response:', data);
+
       if (!response.ok) {
-        throw new Error('Failed to submit form');
+        throw new Error(data.message || 'Failed to submit form');
       }
 
       setIsSubmitted(true);
@@ -50,13 +57,12 @@ const ContactPage = () => {
         message: '',
       });
       
-      // Reset submission status after 5 seconds
       setTimeout(() => {
         setIsSubmitted(false);
       }, 5000);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error submitting form:', error);
-      setError('Failed to submit form. Please try again.');
+      setError(error.message || 'Failed to submit form. Please try again.');
     } finally {
       setIsSubmitting(false);
     }

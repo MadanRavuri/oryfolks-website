@@ -4,6 +4,7 @@ import { ArrowLeft, Send } from 'lucide-react';
 import Hero from '../components/Hero';
 import Section from '../components/Section';
 import Button from '../components/Button';
+import config from '../config';
 
 const ApplicationForm = () => {
   const navigate = useNavigate();
@@ -52,7 +53,7 @@ const ApplicationForm = () => {
         }
       });
 
-      const response = await fetch('http://localhost:5000/api/resume', {
+      const response = await fetch(`${config.apiUrl}/resume`, {
         method: 'POST',
         body: formDataToSend,
       });

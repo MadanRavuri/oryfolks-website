@@ -18,6 +18,8 @@ const allowedOrigins = [
   'https://oryfolks-website.vercel.app',
   'https://oryfolks.com',
   'https://www.oryfolks.com',
+  'https://oryfolks-website-git-main-madan-ravuris-projects.vercel.app',
+  'https://oryfolks-website-ojqfs9f65-madan-ravuris-projects.vercel.app',
   'http://localhost:5173' // for local development
 ];
 
@@ -32,6 +34,7 @@ app.use(cors({
   credentials: true
 }));
 
+// Middleware
 app.use(express.json());
 
 // Create uploads directory if it doesn't exist
@@ -68,39 +71,32 @@ const upload = multer({
 });
 
 // MongoDB Connection
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://ravurimadan:aMF8kLkyshHszuHy@oryfolks.obbgnyd.mongodb.net/oryfolks?retryWrites=true&w=majority';
+const MONGODB_URI = 'mongodb+srv://ravurimadan:aMF8kLkyshHszuHy@oryfolks.obbgnyd.mongodb.net/oryfolks?retryWrites=true&w=majority';
 
-// Improved MongoDB connection with better error handling
-const connectDB = async () => {
-  try {
-    await mongoose.connect(MONGODB_URI, {
-      serverSelectionTimeoutMS: 5000,
-      socketTimeoutMS: 45000,
-    });
-    console.log('Connected to MongoDB Atlas');
-  } catch (err) {
-    console.error('MongoDB connection error:', err);
-    // Retry connection after 5 seconds
-    setTimeout(connectDB, 5000);
-  }
-};
-
-connectDB();
+mongoose.connect(MONGODB_URI, {
+  serverSelectionTimeoutMS: 5000,
+  socketTimeoutMS: 45000,
+})
+  .then(() => console.log('Connected to MongoDB Atlas'))
+  .catch((err) => console.error('MongoDB connection error:', err));
 
 // Resume Routes
-app.post('/api/resume', upload.single('resumeFile'), async (req: Request, res: Response): Promise<void> => {
+// @ts-ignore
+app.post('/api/resume', upload.single('resumeFile'), async (req: Request, res: Response) => {
   try {
     console.log('Received resume data:', req.body);
-    console.log('Received file:', req.file);
+    // Explicitly type req.file after multer has potentially added it
+    const file = req.file as Express.Multer.File | undefined;
+    console.log('Received file:', file);
 
-    if (!req.file) {
+    if (!file) {
       res.status(400).json({ message: 'Resume file is required' });
-      return;
+      return; // Keep return here to stop execution after sending response
     }
 
     const resumeData = {
       ...req.body,
-      resumeFile: req.file.filename,
+      resumeFile: file.filename,
       skills: req.body.skills.split(',').map((skill: string) => skill.trim())
     };
 
@@ -108,6 +104,8 @@ app.post('/api/resume', upload.single('resumeFile'), async (req: Request, res: R
     const savedResume = await resume.save();
     console.log('Saved resume:', savedResume);
     res.status(201).json(savedResume);
+    return; // Explicitly return void after successful response
+
   } catch (error: any) {
     console.error('Error saving resume:', error);
     if (error.message.includes('Invalid file type')) {
@@ -115,6 +113,7 @@ app.post('/api/resume', upload.single('resumeFile'), async (req: Request, res: R
     } else {
       res.status(500).json({ message: 'Failed to save resume' });
     }
+    return; // Explicitly return void after error response
   }
 });
 
@@ -148,17 +147,6 @@ app.get('/api/contact', async (req, res) => {
   } catch (error: any) {
     res.status(500).json({ message: error.message });
   }
-});
-
-// Add a health check endpoint
-app.get('/health', (req: Request, res: Response) => {
-  res.status(200).json({ status: 'ok' });
-});
-
-// Error handling middleware
-app.use((err: Error, req: Request, res: Response, next: Function) => {
-  console.error(err.stack);
-  res.status(500).json({ message: 'Something went wrong!' });
 });
 
 app.listen(port, () => {

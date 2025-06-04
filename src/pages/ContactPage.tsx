@@ -33,13 +33,19 @@ const ContactPage = () => {
       console.log('Submitting form to:', `${config.apiUrl}/contact`);
       console.log('Form data:', formData);
 
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
       const response = await fetch(`${config.apiUrl}/contact`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(formData),
+        signal: controller.signal
       });
+
+      clearTimeout(timeoutId);
 
       const data = await response.json();
       console.log('Response:', data);
@@ -62,7 +68,11 @@ const ContactPage = () => {
       }, 5000);
     } catch (error: any) {
       console.error('Error submitting form:', error);
-      setError(error.message || 'Failed to submit form. Please try again.');
+      if (error.name === 'AbortError') {
+        setError('Request timed out. Please try again.');
+      } else {
+        setError(error.message || 'Failed to submit form. Please try again.');
+      }
     } finally {
       setIsSubmitting(false);
     }

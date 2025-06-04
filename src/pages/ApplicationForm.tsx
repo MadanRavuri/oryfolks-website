@@ -53,10 +53,16 @@ const ApplicationForm = () => {
         }
       });
 
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout for file upload
+
       const response = await fetch(`${config.apiUrl}/resume`, {
         method: 'POST',
         body: formDataToSend,
+        signal: controller.signal
       });
+
+      clearTimeout(timeoutId);
 
       const data = await response.json();
 
@@ -82,7 +88,11 @@ const ApplicationForm = () => {
       }, 5000);
     } catch (error: any) {
       console.error('Error submitting application:', error);
-      setError(error.message || 'Failed to submit application. Please try again.');
+      if (error.name === 'AbortError') {
+        setError('Request timed out. Please try again.');
+      } else {
+        setError(error.message || 'Failed to submit application. Please try again.');
+      }
     } finally {
       setIsSubmitting(false);
     }

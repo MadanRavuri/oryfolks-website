@@ -14,10 +14,10 @@ const app = express();
 // CORS configuration for production
 const allowedOrigins = [
   'https://oryfolks-website.vercel.app',
+  'https://oryfolks-website-git-main-madan-ravuris-projects.vercel.app',
+  'https://oryfolks-website-6s1uwo2z4-madan-ravuris-projects.vercel.app',
   'https://oryfolks.com',
   'https://www.oryfolks.com',
-  'https://oryfolks-website-git-main-madan-ravuris-projects.vercel.app',
-  'https://oryfolks-website-ojqfs9f65-madan-ravuris-projects.vercel.app',
   'http://localhost:5173' // for local development
 ];
 
@@ -26,6 +26,7 @@ app.use(cors({
     if (!origin || allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
+      console.log('Blocked by CORS:', origin);
       callback(new Error('Not allowed by CORS'));
     }
   },
@@ -59,10 +60,52 @@ if (!MONGODB_URI) {
   throw new Error('MONGODB_URI is not defined in environment variables');
 }
 
-// Connect to MongoDB
-mongoose.connect(MONGODB_URI)
-  .then(() => console.log('Connected to MongoDB Atlas'))
-  .catch((err) => console.error('MongoDB connection error:', err));
+// MongoDB connection options
+const mongooseOptions = {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  serverSelectionTimeoutMS: 5000,
+  socketTimeoutMS: 45000,
+};
+
+// Connect to MongoDB with retry logic
+const connectWithRetry = async () => {
+  try {
+    await mongoose.connect(MONGODB_URI, mongooseOptions);
+    console.log('Connected to MongoDB Atlas');
+  } catch (err) {
+    console.error('MongoDB connection error:', err);
+    console.log('Retrying connection in 5 seconds...');
+    setTimeout(connectWithRetry, 5000);
+  }
+};
+
+// Initial connection
+connectWithRetry();
+
+// Handle connection events
+mongoose.connection.on('error', (err) => {
+  console.error('MongoDB connection error:', err);
+});
+
+mongoose.connection.on('disconnected', () => {
+  console.log('MongoDB disconnected. Attempting to reconnect...');
+  connectWithRetry();
+});
+
+// Request validation middleware
+const validateContactRequest = (req: Request, res: Response, next: NextFunction): void => {
+  const { name, email, phone, subject, message } = req.body;
+  if (!name || !email || !phone || !subject || !message) {
+    res.status(400).json({ message: 'All fields are required' });
+    return;
+  }
+  if (!email.includes('@')) {
+    res.status(400).json({ message: 'Invalid email format' });
+    return;
+  }
+  next();
+};
 
 // Resume Routes
 app.post('/api/resume', upload.single('resumeFile'), async (req: Request, res: Response, next: NextFunction) => {
@@ -73,6 +116,13 @@ app.post('/api/resume', upload.single('resumeFile'), async (req: Request, res: R
 
     if (!file) {
       res.status(400).json({ message: 'Resume file is required' });
+      return;
+    }
+
+    // Validate required fields
+    const { name, email, phone, position, experience, education, skills } = req.body;
+    if (!name || !email || !phone || !position || !experience || !education || !skills) {
+      res.status(400).json({ message: 'All fields are required' });
       return;
     }
 
@@ -92,6 +142,7 @@ app.post('/api/resume', upload.single('resumeFile'), async (req: Request, res: R
     res.status(201).json(savedResume);
 
   } catch (error: any) {
+    console.error('Error saving resume:', error);
     next(error);
   }
 });
@@ -101,12 +152,13 @@ app.get('/api/resume', async (req: Request, res: Response, next: NextFunction) =
     const resumes = await Resume.find().sort({ createdAt: -1 });
     res.json(resumes);
   } catch (error: any) {
+    console.error('Error fetching resumes:', error);
     next(error);
   }
 });
 
 // Contact Routes
-app.post('/api/contact', async (req: Request, res: Response, next: NextFunction) => {
+app.post('/api/contact', validateContactRequest, async (req: Request, res: Response, next: NextFunction) => {
   try {
     console.log('Received contact data:', req.body);
     const contact = new Contact(req.body);
@@ -114,6 +166,7 @@ app.post('/api/contact', async (req: Request, res: Response, next: NextFunction)
     console.log('Saved contact:', savedContact);
     res.status(201).json(savedContact);
   } catch (error: any) {
+    console.error('Error saving contact:', error);
     next(error);
   }
 });
@@ -123,6 +176,7 @@ app.get('/api/contact', async (req: Request, res: Response, next: NextFunction) 
     const contacts = await Contact.find().sort({ createdAt: -1 });
     res.json(contacts);
   } catch (error: any) {
+    console.error('Error fetching contacts:', error);
     next(error);
   }
 });
@@ -132,6 +186,10 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   console.error('Error:', err);
   if (err.message.includes('Invalid file type')) {
     res.status(400).json({ message: err.message });
+  } else if (err.name === 'ValidationError') {
+    res.status(400).json({ message: err.message });
+  } else if (err.name === 'MongoError' && err.code === 11000) {
+    res.status(400).json({ message: 'Duplicate entry found' });
   } else {
     res.status(500).json({ message: 'Internal server error' });
   }
@@ -139,7 +197,12 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
 
 // Health check endpoint
 app.get('/api/health', (req: Request, res: Response) => {
-  res.status(200).json({ status: 'ok' });
+  const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
+  res.status(200).json({ 
+    status: 'ok',
+    database: dbStatus,
+    timestamp: new Date().toISOString()
+  });
 });
 
 export default app; 

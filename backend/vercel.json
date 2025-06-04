@@ -8,8 +8,17 @@
   ],
   "routes": [
     {
-      "src": "/(.*)",
+      "src": "/api/(.*)",
       "dest": "/src/server.ts"
     }
-  ]
+  ],
+  "env": {
+    "MONGODB_URI": "@mongodb_uri"
+  },
+  "functions": {
+    "src/server.ts": {
+      "memory": 1024,
+      "maxDuration": 10
+    }
+  }
 } 

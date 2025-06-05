@@ -14,23 +14,23 @@ const app = express();
 // CORS configuration for production
 const allowedOrigins = [
   'https://oryfolks-website.vercel.app',
-  'https://oryfolks-website-git-main-madan-ravuris-projects.vercel.app',
-  'https://oryfolks-website-6s1uwo2z4-madan-ravuris-projects.vercel.app',
   'https://oryfolks.com',
   'https://www.oryfolks.com',
-  'http://localhost:5173' // for local development
+  'https://oryfolks-website-git-main-madan-ravuris-projects.vercel.app',
+  'https://oryfolks-website-ojqfs9f65-madan-ravuris-projects.vercel.app',
+  'http://localhost:5173', // for local development
+  'http://localhost:3000', // additional local development port
+  'http://127.0.0.1:5173', // additional local development URL
+  'http://127.0.0.1:3000',  // additional local development URL
+  
+'https://oryfolks-website-n2aw.vercel.app'
 ];
 
+// Basic CORS setup for development
 app.use(cors({
-  origin: function(origin, callback) {
-    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      console.log('Blocked by CORS:', origin);
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true
+  origin: '*', // Allow all origins in development
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 // Middleware
@@ -54,61 +54,24 @@ const upload = multer({
 });
 
 // MongoDB Connection
-const MONGODB_URI = process.env.MONGODB_URI;
-
-if (!MONGODB_URI) {
-  throw new Error('MONGODB_URI is not defined in environment variables');
-}
-
-// MongoDB connection options
-const mongooseOptions = {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-  serverSelectionTimeoutMS: 5000,
-  socketTimeoutMS: 45000,
-};
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/oryfolks';
 
 // Connect to MongoDB with retry logic
-const connectWithRetry = async () => {
+const connectDB = async () => {
   try {
-    await mongoose.connect(MONGODB_URI, mongooseOptions);
+    await mongoose.connect(MONGODB_URI);
     console.log('Connected to MongoDB Atlas');
   } catch (err) {
     console.error('MongoDB connection error:', err);
-    console.log('Retrying connection in 5 seconds...');
-    setTimeout(connectWithRetry, 5000);
+    // Retry connection after 5 seconds
+    setTimeout(connectDB, 5000);
   }
 };
 
-// Initial connection
-connectWithRetry();
-
-// Handle connection events
-mongoose.connection.on('error', (err) => {
-  console.error('MongoDB connection error:', err);
-});
-
-mongoose.connection.on('disconnected', () => {
-  console.log('MongoDB disconnected. Attempting to reconnect...');
-  connectWithRetry();
-});
-
-// Request validation middleware
-const validateContactRequest = (req: Request, res: Response, next: NextFunction): void => {
-  const { name, email, phone, subject, message } = req.body;
-  if (!name || !email || !phone || !subject || !message) {
-    res.status(400).json({ message: 'All fields are required' });
-    return;
-  }
-  if (!email.includes('@')) {
-    res.status(400).json({ message: 'Invalid email format' });
-    return;
-  }
-  next();
-};
+connectDB();
 
 // Resume Routes
-app.post('/api/resume', upload.single('resumeFile'), async (req: Request, res: Response, next: NextFunction) => {
+app.post('/api/resume', upload.single('resumeFile'), async (req: Request, res: Response) => {
   try {
     console.log('Received resume data:', req.body);
     const file = req.file as Express.Multer.File | undefined;
@@ -116,13 +79,6 @@ app.post('/api/resume', upload.single('resumeFile'), async (req: Request, res: R
 
     if (!file) {
       res.status(400).json({ message: 'Resume file is required' });
-      return;
-    }
-
-    // Validate required fields
-    const { name, email, phone, position, experience, education, skills } = req.body;
-    if (!name || !email || !phone || !position || !experience || !education || !skills) {
-      res.status(400).json({ message: 'All fields are required' });
       return;
     }
 
@@ -143,22 +99,22 @@ app.post('/api/resume', upload.single('resumeFile'), async (req: Request, res: R
 
   } catch (error: any) {
     console.error('Error saving resume:', error);
-    next(error);
+    res.status(500).json({ message: 'Error saving resume' });
   }
 });
 
-app.get('/api/resume', async (req: Request, res: Response, next: NextFunction) => {
+app.get('/api/resume', async (_req: Request, res: Response) => {
   try {
     const resumes = await Resume.find().sort({ createdAt: -1 });
     res.json(resumes);
   } catch (error: any) {
     console.error('Error fetching resumes:', error);
-    next(error);
+    res.status(500).json({ message: 'Error fetching resumes' });
   }
 });
 
 // Contact Routes
-app.post('/api/contact', validateContactRequest, async (req: Request, res: Response, next: NextFunction) => {
+app.post('/api/contact', async (req: Request, res: Response) => {
   try {
     console.log('Received contact data:', req.body);
     const contact = new Contact(req.body);
@@ -167,42 +123,39 @@ app.post('/api/contact', validateContactRequest, async (req: Request, res: Respo
     res.status(201).json(savedContact);
   } catch (error: any) {
     console.error('Error saving contact:', error);
-    next(error);
+    res.status(500).json({ message: 'Error saving contact' });
   }
 });
 
-app.get('/api/contact', async (req: Request, res: Response, next: NextFunction) => {
+app.get('/api/contact', async (_req: Request, res: Response) => {
   try {
     const contacts = await Contact.find().sort({ createdAt: -1 });
     res.json(contacts);
   } catch (error: any) {
     console.error('Error fetching contacts:', error);
-    next(error);
+    res.status(500).json({ message: 'Error fetching contacts' });
   }
 });
 
 // Error handling middleware
-app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
   console.error('Error:', err);
   if (err.message.includes('Invalid file type')) {
     res.status(400).json({ message: err.message });
-  } else if (err.name === 'ValidationError') {
-    res.status(400).json({ message: err.message });
-  } else if (err.name === 'MongoError' && err.code === 11000) {
-    res.status(400).json({ message: 'Duplicate entry found' });
   } else {
     res.status(500).json({ message: 'Internal server error' });
   }
 });
 
 // Health check endpoint
-app.get('/api/health', (req: Request, res: Response) => {
-  const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
-  res.status(200).json({ 
-    status: 'ok',
-    database: dbStatus,
-    timestamp: new Date().toISOString()
-  });
+app.get('/api/health', (_req: Request, res: Response) => {
+  res.status(200).json({ status: 'ok' });
+});
+
+// Start server
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });
 
 export default app; 

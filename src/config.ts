@@ -1,6 +1,6 @@
 const config = {
-  apiUrl: process.env.NODE_ENV === 'production' 
-    ? 'https://oryfolks-website-n2aw.vercel.app/api'  // Backend Vercel deployment URL
+  apiUrl: import.meta.env.MODE === 'production' 
+    ? 'https://oryfolks-website-backend.vercel.app/api'  // Correct backend Vercel deployment URL
     : 'http://localhost:5000/api', // Local development
 };
 

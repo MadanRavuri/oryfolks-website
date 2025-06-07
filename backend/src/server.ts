@@ -21,24 +21,17 @@ const allowedOrigins = [
   'http://localhost:5173', // for local development
   'http://localhost:3000', // additional local development port
   'http://127.0.0.1:5173', // additional local development URL
-  'http://127.0.0.1:3000',
-  'https://oryfolks-website-n2aw.vercel.app'
+  'http://127.0.0.1:3000',  // additional local development URL
+  
+'https://oryfolks-website-n2aw.vercel.app'
 ];
 
-const corsOptions = {
-  origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
-    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+// Basic CORS setup for development
+app.use(cors({
+  origin: '*', // Allow all origins in development
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
-};
-
-// Basic CORS setup for development
-app.use(cors(corsOptions));
+}));
 
 // Middleware
 app.use(express.json({ limit: '50mb' }));
@@ -96,7 +89,7 @@ app.post('/api/resume', upload.single('resumeFile'), async (req: Request, res: R
     const resumeData = {
       ...req.body,
       resumeFile: fileData,
-      skills: typeof req.body.skills === 'string' ? req.body.skills.split(',').map((skill: string) => skill.trim()) : []
+      skills: req.body.skills.split(',').map((skill: string) => skill.trim())
     };
 
     const resume = new Resume(resumeData);

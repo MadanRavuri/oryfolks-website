@@ -12,14 +12,15 @@
       "src": "backend/src/server.ts",
       "use": "@vercel/node",
       "config": {
-        "buildCommand": "cd backend && npm run build"
+        "buildCommand": "cd backend && npm install && npm run build",
+        "includeFiles": ["backend/dist/**"]
       }
     }
   ],
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "/backend/src/server.ts"
+      "dest": "/backend/dist/server.js"
     },
     {
       "src": "/(.*)",
@@ -30,7 +31,7 @@
     "MONGODB_URI": "@mongodb_uri"
   },
   "functions": {
-    "backend/src/server.ts": {
+    "backend/dist/server.js": {
       "memory": 3008,
       "maxDuration": 60
     }

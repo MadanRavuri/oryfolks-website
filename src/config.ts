@@ -1,6 +1,6 @@
 const config = {
-  apiUrl: import.meta.env.MODE === 'production' 
-    ? 'https://oryfolks-website-backend.vercel.app/api'  // Correct backend Vercel deployment URL
+  apiUrl: import.meta.env.MODE === 'production'
+    ? '/api'  // Update to a relative path for combined deployment
     : 'http://localhost:5000/api', // Local development
 };
 

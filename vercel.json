@@ -6,7 +6,7 @@
     }
   ],
   "functions": {
-    "api/users/**/*.js": {
+    "backend/dist/server.js": {
       "maxDuration": 30
     }
   }

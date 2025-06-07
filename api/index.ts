@@ -8,6 +8,7 @@ import Resume from './models/Resume';
 import Contact from './models/Contact';
 
 dotenv.config();
+console.log('Serverless function starting up...');
 
 const app = express();
 
@@ -58,6 +59,7 @@ const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/oryfol
 
 // Connect to MongoDB with retry logic
 const connectDB = async () => {
+  console.log('Attempting to connect to MongoDB...');
   try {
     await mongoose.connect(MONGODB_URI);
     console.log('Connected to MongoDB Atlas');
@@ -72,6 +74,7 @@ connectDB();
 
 // Resume Routes
 app.post('/api/resume', upload.single('resumeFile'), async (req: Request, res: Response) => {
+  console.log('POST /api/resume route hit.');
   try {
     console.log('Received resume data:', req.body);
     const file = req.file as Express.Multer.File | undefined;
@@ -104,6 +107,7 @@ app.post('/api/resume', upload.single('resumeFile'), async (req: Request, res: R
 });
 
 app.get('/api/resume', async (_req: Request, res: Response) => {
+  console.log('GET /api/resume route hit.');
   try {
     const resumes = await Resume.find().sort({ createdAt: -1 });
     res.json(resumes);
@@ -115,6 +119,7 @@ app.get('/api/resume', async (_req: Request, res: Response) => {
 
 // Contact Routes
 app.post('/api/contact', async (req: Request, res: Response) => {
+  console.log('POST /api/contact route hit.');
   try {
     console.log('Received contact data:', req.body);
     const contact = new Contact(req.body);
@@ -128,6 +133,7 @@ app.post('/api/contact', async (req: Request, res: Response) => {
 });
 
 app.get('/api/contact', async (_req: Request, res: Response) => {
+  console.log('GET /api/contact route hit.');
   try {
     const contacts = await Contact.find().sort({ createdAt: -1 });
     res.json(contacts);
@@ -139,7 +145,7 @@ app.get('/api/contact', async (_req: Request, res: Response) => {
 
 // Error handling middleware
 app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-  console.error('Error:', err);
+  console.error('Error in middleware:', err);
   if (err.message.includes('Invalid file type')) {
     res.status(400).json({ message: err.message });
   } else {
@@ -149,6 +155,7 @@ app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
 
 // Health check endpoint
 app.get('/api/health', (_req: Request, res: Response) => {
+  console.log('GET /api/health route hit.');
   res.status(200).json({ status: 'ok' });
 });
 

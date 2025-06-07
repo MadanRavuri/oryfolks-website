@@ -1,39 +1,8 @@
 {
-  "version": 2,
-  "builds": [
-    {
-      "src": "package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "dist"
-      }
-    },
-    {
-      "src": "backend/src/server.ts",
-      "use": "@vercel/node",
-      "config": {
-        "buildCommand": "cd backend && npm install && npm run build",
-        "includeFiles": ["backend/dist/**"]
-      }
-    }
-  ],
   "rewrites": [
-    {
-      "source": "/api/(.*)",
-      "destination": "/backend/src/server.ts"
-    },
     {
       "source": "/(.*)",
       "destination": "/index.html"
     }
-  ],
-  "env": {
-    "MONGODB_URI": "@mongodb_uri"
-  },
-  "functions": {
-    "backend/src/server.ts": {
-      "memory": 3008,
-      "maxDuration": 60
-    }
-  }
+  ]
 } 

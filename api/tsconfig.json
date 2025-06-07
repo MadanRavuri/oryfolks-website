@@ -6,9 +6,9 @@
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "skipLibCheck": true,
-    "outDir": "./dist",
-    "rootDir": "./",
+    "outDir": "../dist",
+    "rootDir": ".",
     "resolveJsonModule": true
   },
-  "include": ["server.ts", "models/**/*.ts"]
+  "include": ["index.ts", "models/**/*.ts"]
 } 

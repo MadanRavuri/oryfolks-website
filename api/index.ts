@@ -23,16 +23,30 @@ const allowedOrigins = [
   'http://localhost:3000', // additional local development port
   'http://127.0.0.1:5173', // additional local development URL
   'http://127.0.0.1:3000',  // additional local development URL
-  
-'https://oryfolks-website-n2aw.vercel.app'
+  'https://oryfolks-website-n2aw.vercel.app'
 ];
 
-// Basic CORS setup for development
+// CORS middleware configuration
 app.use(cors({
-  origin: '*', // Allow all origins in development
+  origin: function(origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) === -1) {
+      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+  preflightContinue: false,
+  optionsSuccessStatus: 204
 }));
+
+// Handle OPTIONS requests explicitly
+app.options('*', cors());
 
 // Middleware
 app.use(express.json({ limit: '50mb' }));

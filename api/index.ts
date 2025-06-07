@@ -135,14 +135,50 @@ app.get('/api/resume', async (_req: Request, res: Response) => {
 app.post('/api/contact', async (req: Request, res: Response) => {
   console.log('POST /api/contact route hit.');
   try {
-    console.log('Received contact data:', req.body);
+    console.log('Request headers:', req.headers);
+    console.log('Request body:', req.body);
+    
+    if (!req.body || Object.keys(req.body).length === 0) {
+      console.error('Empty request body received');
+      res.status(400).json({ 
+        error: 'Request body is empty',
+        message: 'Please provide contact information'
+      });
+      return;
+    }
+
     const contact = new Contact(req.body);
+    console.log('Created contact object:', contact);
+    
     const savedContact = await contact.save();
-    console.log('Saved contact:', savedContact);
-    res.status(201).json(savedContact);
+    console.log('Successfully saved contact:', savedContact);
+    
+    res.status(201).json({
+      success: true,
+      data: savedContact,
+      message: 'Contact form submitted successfully'
+    });
   } catch (error: any) {
-    console.error('Error saving contact:', error);
-    res.status(500).json({ message: 'Error saving contact' });
+    console.error('Error in /api/contact:', error);
+    console.error('Error stack:', error.stack);
+    
+    // Handle validation errors
+    if (error.name === 'ValidationError') {
+      res.status(400).json({
+        success: false,
+        error: 'Validation Error',
+        message: error.message,
+        details: Object.values(error.errors).map((err: any) => err.message)
+      });
+      return;
+    }
+    
+    // Handle other errors
+    res.status(500).json({
+      success: false,
+      error: 'Server Error',
+      message: 'An error occurred while processing your request'
+    });
   }
 });
 

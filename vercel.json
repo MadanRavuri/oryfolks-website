@@ -20,7 +20,16 @@
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "/backend/dist/server.js"
+      "dest": "/backend/src/server.ts",
+      "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+      "headers": {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization",
+        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS"
+      }
+    },
+    {
+      "handle": "filesystem"
     },
     {
       "src": "/(.*)",
@@ -31,7 +40,7 @@
     "MONGODB_URI": "@mongodb_uri"
   },
   "functions": {
-    "backend/dist/server.js": {
+    "backend/src/server.ts": {
       "memory": 3008,
       "maxDuration": 60
     }

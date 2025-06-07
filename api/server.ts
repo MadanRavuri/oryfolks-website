@@ -4,8 +4,8 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import multer from 'multer';
 import path from 'path';
-import Resume from './models/Resume';
-import Contact from './models/Contact';
+import Resume from '../backend/src/models/Resume';
+import Contact from '../backend/src/models/Contact';
 
 dotenv.config();
 

@@ -19,12 +19,12 @@
       "handle": "filesystem"
     },
     {
-      "src": "//(.*)",
+      "src": "/(.*)",
       "dest": "/index.html"
     }
   ],
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/index.ts" },
-    { "source": "//(.*)", "destination": "/index.html" }
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 } 

@@ -5,9 +5,14 @@ import App from './App';
 import './index.css';
 import './i18n'; //  Import this line to initialize i18next
 
-createRoot(document.getElementById('root')!).render(
+const rootElement = document.getElementById('root');
+if (!rootElement) throw new Error('Failed to find the root element');
+
+const root = createRoot(rootElement);
+
+root.render(
   <StrictMode>
-    <BrowserRouter>
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
       <App />
     </BrowserRouter>
   </StrictMode>

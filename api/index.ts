@@ -303,7 +303,7 @@ app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     };
     console.log('Sending server error response:', response);
     return res.status(500).json(response);
-  } catch (error) {
+  } catch (error: any) {
     // If something goes wrong in our error handling, send a safe error response
     console.error('Error in error handler:', error);
     const response = {

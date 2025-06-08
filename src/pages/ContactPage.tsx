@@ -56,23 +56,39 @@ const ContactPage = () => {
         let responseText;
         try {
           responseText = await response.text();
-          data = JSON.parse(responseText);
+          console.log('Raw response:', responseText);
+          
+          if (!responseText) {
+            throw new Error('Empty response received from server');
+          }
+          
+          try {
+            data = JSON.parse(responseText);
+          } catch (parseError) {
+            console.error('Error parsing JSON response:', parseError);
+            console.error('Invalid JSON response:', responseText);
+            throw new Error('Server returned invalid JSON response');
+          }
         } catch (parseError) {
-          console.error('Error parsing response:', parseError);
-          console.error('Raw response:', responseText);
-          throw new Error('Server returned an invalid response');
+          console.error('Error handling response:', parseError);
+          throw new Error('Failed to process server response');
         }
 
-        console.log('Response:', data);
+        console.log('Parsed response:', data);
 
         if (!response.ok) {
-          throw new Error(data.message || `Server error: ${response.status}`);
+          const errorMessage = data?.message || `Server error: ${response.status}`;
+          console.error('Server error:', errorMessage);
+          throw new Error(errorMessage);
         }
 
         if (!data.success) {
-          throw new Error(data.message || 'Failed to submit form');
+          const errorMessage = data?.message || 'Failed to submit form';
+          console.error('Form submission failed:', errorMessage);
+          throw new Error(errorMessage);
         }
 
+        console.log('Form submitted successfully:', data);
         setIsSubmitted(true);
         setFormData({
           name: '',
@@ -106,6 +122,7 @@ const ContactPage = () => {
     try {
       await submitForm();
     } catch (error: any) {
+      console.error('Final error after retries:', error);
       setError(error.message || 'Failed to submit form. Please try again.');
     } finally {
       setIsSubmitting(false);

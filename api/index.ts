@@ -146,8 +146,14 @@ app.get('/api/resume', async (_req: Request, res: Response) => {
 app.post('/api/contact', async (req: Request, res: Response) => {
   console.log('POST /api/contact route hit.');
   try {
-    console.log('Request headers:', req.headers);
-    console.log('Request body:', req.body);
+    // Log the complete request details
+    console.log('Request details:', {
+      headers: req.headers,
+      body: req.body,
+      method: req.method,
+      url: req.url,
+      query: req.query
+    });
     
     if (!req.body || Object.keys(req.body).length === 0) {
       console.error('Empty request body received');
@@ -158,37 +164,71 @@ app.post('/api/contact', async (req: Request, res: Response) => {
       });
     }
 
+    // Validate required fields
+    const requiredFields = ['name', 'email', 'phone', 'subject', 'message'];
+    const missingFields = requiredFields.filter(field => !req.body[field]);
+    
+    if (missingFields.length > 0) {
+      console.error('Missing required fields:', missingFields);
+      return res.status(400).json({
+        success: false,
+        error: 'Validation Error',
+        message: `Missing required fields: ${missingFields.join(', ')}`
+      });
+    }
+
+    // Create and save contact
     const contact = new Contact(req.body);
     console.log('Created contact object:', contact);
     
     const savedContact = await contact.save();
     console.log('Successfully saved contact:', savedContact);
     
-    return res.status(201).json({
+    // Send success response
+    const response = {
       success: true,
       data: savedContact,
       message: 'Contact form submitted successfully'
-    });
+    };
+    
+    console.log('Sending response:', response);
+    return res.status(201).json(response);
+    
   } catch (error: any) {
     console.error('Error in /api/contact:', error);
     console.error('Error stack:', error.stack);
     
     // Handle validation errors
     if (error.name === 'ValidationError') {
-      return res.status(400).json({
+      const response = {
         success: false,
         error: 'Validation Error',
         message: error.message,
         details: Object.values(error.errors).map((err: any) => err.message)
-      });
+      };
+      console.log('Sending validation error response:', response);
+      return res.status(400).json(response);
+    }
+    
+    // Handle mongoose errors
+    if (error.name === 'MongoError' || error.name === 'MongoServerError') {
+      const response = {
+        success: false,
+        error: 'Database Error',
+        message: 'A database error occurred'
+      };
+      console.log('Sending database error response:', response);
+      return res.status(500).json(response);
     }
     
     // Handle other errors
-    return res.status(500).json({
+    const response = {
       success: false,
       error: 'Server Error',
       message: 'An error occurred while processing your request'
-    });
+    };
+    console.log('Sending server error response:', response);
+    return res.status(500).json(response);
   }
 });
 
@@ -206,60 +246,73 @@ app.get('/api/contact', async (_req: Request, res: Response) => {
 // Error handling middleware
 app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
   console.error('Error in middleware:', err);
+  console.error('Error stack:', err.stack);
   
   // Ensure we always send a valid JSON response
   try {
     // Handle JSON parsing errors
     if (err instanceof SyntaxError && 'body' in err) {
-      return res.status(400).json({
+      const response = {
         success: false,
         error: 'Invalid JSON',
         message: 'The request body contains invalid JSON'
-      });
+      };
+      console.log('Sending JSON parsing error response:', response);
+      return res.status(400).json(response);
     }
     
     // Handle file type errors
     if (err.message && err.message.includes('Invalid file type')) {
-      return res.status(400).json({
+      const response = {
         success: false,
         error: 'Invalid File Type',
         message: err.message
-      });
+      };
+      console.log('Sending file type error response:', response);
+      return res.status(400).json(response);
     }
     
     // Handle validation errors
     if (err.name === 'ValidationError') {
-      return res.status(400).json({
+      const response = {
         success: false,
         error: 'Validation Error',
         message: err.message,
         details: Object.values(err.errors).map((e: any) => e.message)
-      });
+      };
+      console.log('Sending validation error response:', response);
+      return res.status(400).json(response);
     }
     
     // Handle mongoose errors
     if (err.name === 'MongoError' || err.name === 'MongoServerError') {
-      return res.status(500).json({
+      const response = {
         success: false,
         error: 'Database Error',
         message: 'A database error occurred'
-      });
+      };
+      console.log('Sending database error response:', response);
+      return res.status(500).json(response);
     }
     
     // Handle other errors
-    return res.status(500).json({
+    const response = {
       success: false,
       error: 'Server Error',
       message: err.message || 'An unexpected error occurred'
-    });
+    };
+    console.log('Sending server error response:', response);
+    return res.status(500).json(response);
   } catch (error) {
     // If something goes wrong in our error handling, send a safe error response
     console.error('Error in error handler:', error);
-    return res.status(500).json({
+    const response = {
       success: false,
       error: 'Server Error',
       message: 'An unexpected error occurred'
-    });
+    };
+    console.log('Sending fallback error response:', response);
+    return res.status(500).json(response);
   }
 });
 

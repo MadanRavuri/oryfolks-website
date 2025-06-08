@@ -157,13 +157,11 @@ app.post('/api/contact', async (req: Request, res: Response) => {
     
     if (!req.body || Object.keys(req.body).length === 0) {
       console.error('Empty request body received');
-      const response = { 
+      return res.status(400).json({ 
         success: false,
         error: 'Validation Error',
         message: 'Please provide contact information'
-      };
-      console.log('Sending validation error response:', response);
-      return res.status(400).json(response);
+      });
     }
 
     // Validate required fields
@@ -172,13 +170,11 @@ app.post('/api/contact', async (req: Request, res: Response) => {
     
     if (missingFields.length > 0) {
       console.error('Missing required fields:', missingFields);
-      const response = {
+      return res.status(400).json({
         success: false,
         error: 'Validation Error',
         message: `Missing required fields: ${missingFields.join(', ')}`
-      };
-      console.log('Sending validation error response:', response);
-      return res.status(400).json(response);
+      });
     }
 
     // Create and save contact
@@ -195,9 +191,8 @@ app.post('/api/contact', async (req: Request, res: Response) => {
       message: 'Contact form submitted successfully'
     };
     
-    console.log('Sending success response:', response);
-    res.status(201).json(response);
-    console.log('Response sent successfully');
+    console.log('Sending response:', response);
+    return res.status(201).json(response);
     
   } catch (error: any) {
     console.error('Error in /api/contact:', error);
@@ -212,9 +207,7 @@ app.post('/api/contact', async (req: Request, res: Response) => {
         details: Object.values(error.errors).map((err: any) => err.message)
       };
       console.log('Sending validation error response:', response);
-      res.status(400).json(response);
-      console.log('Validation error response sent');
-      return;
+      return res.status(400).json(response);
     }
     
     // Handle mongoose errors
@@ -225,9 +218,7 @@ app.post('/api/contact', async (req: Request, res: Response) => {
         message: 'A database error occurred'
       };
       console.log('Sending database error response:', response);
-      res.status(500).json(response);
-      console.log('Database error response sent');
-      return;
+      return res.status(500).json(response);
     }
     
     // Handle other errors
@@ -237,8 +228,7 @@ app.post('/api/contact', async (req: Request, res: Response) => {
       message: 'An error occurred while processing your request'
     };
     console.log('Sending server error response:', response);
-    res.status(500).json(response);
-    console.log('Server error response sent');
+    return res.status(500).json(response);
   }
 });
 

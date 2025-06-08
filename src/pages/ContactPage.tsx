@@ -29,105 +29,50 @@ const ContactPage = () => {
     setIsSubmitting(true);
     setError(null);
     
-    const maxRetries = 2;
-    let retryCount = 0;
-    
-    const submitForm = async (): Promise<void> => {
-      try {
-        console.log('Submitting form to:', `${config.apiUrl}/contact`);
-        console.log('Form data:', formData);
-
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
-
-        const response = await fetch(`${config.apiUrl}/contact`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          },
-          body: JSON.stringify(formData),
-          signal: controller.signal
-        });
-
-        clearTimeout(timeoutId);
-
-        // Log response details
-        console.log('Response status:', response.status);
-        console.log('Response headers:', Object.fromEntries(response.headers.entries()));
-
-        let data;
-        let responseText;
-        try {
-          responseText = await response.text();
-          console.log('Raw response:', responseText);
-          
-          if (!responseText) {
-            throw new Error('Empty response received from server');
-          }
-          
-          try {
-            data = JSON.parse(responseText);
-          } catch (parseError: any) {
-            console.error('Error parsing JSON response:', parseError);
-            console.error('Invalid JSON response:', responseText);
-            throw new Error(`Server returned invalid JSON response: ${responseText.substring(0, 100)}...`);
-          }
-        } catch (parseError: any) {
-          console.error('Error handling response:', parseError);
-          throw new Error(`Failed to process server response: ${parseError.message}`);
-        }
-
-        console.log('Parsed response:', data);
-
-        if (!response.ok) {
-          const errorMessage = data?.message || data?.error || `Server error: ${response.status}`;
-          console.error('Server error:', errorMessage);
-          throw new Error(errorMessage);
-        }
-
-        if (!data.success) {
-          const errorMessage = data?.message || data?.error || 'Failed to submit form';
-          console.error('Form submission failed:', errorMessage);
-          throw new Error(errorMessage);
-        }
-
-        console.log('Form submitted successfully:', data);
-        setIsSubmitted(true);
-        setFormData({
-          name: '',
-          email: '',
-          phone: '',
-          subject: '',
-          message: '',
-        });
-        
-        setTimeout(() => {
-          setIsSubmitted(false);
-        }, 5000);
-      } catch (error: any) {
-        console.error('Error submitting form:', error);
-        
-        if (error.name === 'AbortError') {
-          throw new Error('Request timed out. Please try again.');
-        }
-        
-        if (retryCount < maxRetries) {
-          retryCount++;
-          console.log(`Retrying submission (${retryCount}/${maxRetries})...`);
-          await new Promise(resolve => setTimeout(resolve, 1000 * retryCount)); // Exponential backoff
-          return submitForm();
-        }
-        
-        throw error;
-      }
-    };
-
     try {
-      await submitForm();
+      console.log('Submitting form to:', `${config.apiUrl}/contact`);
+      console.log('Form data:', formData);
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
+      const response = await fetch(`${config.apiUrl}/contact`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+        signal: controller.signal
+      });
+
+      clearTimeout(timeoutId);
+
+      const data = await response.json();
+      console.log('Response:', data);
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to submit form');
+      }
+
+      setIsSubmitted(true);
+      setFormData({
+        name: '',
+        email: '',
+        phone: '',
+        subject: '',
+        message: '',
+      });
+      
+      setTimeout(() => {
+        setIsSubmitted(false);
+      }, 5000);
     } catch (error: any) {
-      console.error('Final error:', error);
-      setError(error.message || 'Failed to submit form. Please try again.');
+      console.error('Error submitting form:', error);
+      if (error.name === 'AbortError') {
+        setError('Request timed out. Please try again.');
+      } else {
+        setError(error.message || 'Failed to submit form. Please try again.');
+      }
     } finally {
       setIsSubmitting(false);
     }

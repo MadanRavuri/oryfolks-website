@@ -49,18 +49,7 @@ app.use(cors({
 app.options('*', cors());
 
 // Middleware
-app.use(express.json({ limit: '50mb', strict: true }));
-app.use(express.urlencoded({ extended: true, limit: '50mb' }));
-
-// Add request logging middleware
-app.use((req: Request, _res: Response, next: NextFunction) => {
-  console.log(`${req.method} ${req.path}`, {
-    headers: req.headers,
-    body: req.body,
-    query: req.query
-  });
-  next();
-});
+app.use(express.json({ limit: '50mb' }));
 
 // Configure multer for memory storage (for serverless environment)
 const upload = multer({ 
@@ -146,89 +135,50 @@ app.get('/api/resume', async (_req: Request, res: Response) => {
 app.post('/api/contact', async (req: Request, res: Response) => {
   console.log('POST /api/contact route hit.');
   try {
-    // Log the complete request details
-    console.log('Request details:', {
-      headers: req.headers,
-      body: req.body,
-      method: req.method,
-      url: req.url,
-      query: req.query
-    });
+    console.log('Request headers:', req.headers);
+    console.log('Request body:', req.body);
     
     if (!req.body || Object.keys(req.body).length === 0) {
       console.error('Empty request body received');
-      return res.status(400).json({ 
-        success: false,
-        error: 'Validation Error',
+      res.status(400).json({ 
+        error: 'Request body is empty',
         message: 'Please provide contact information'
       });
+      return;
     }
 
-    // Validate required fields
-    const requiredFields = ['name', 'email', 'phone', 'subject', 'message'];
-    const missingFields = requiredFields.filter(field => !req.body[field]);
-    
-    if (missingFields.length > 0) {
-      console.error('Missing required fields:', missingFields);
-      return res.status(400).json({
-        success: false,
-        error: 'Validation Error',
-        message: `Missing required fields: ${missingFields.join(', ')}`
-      });
-    }
-
-    // Create and save contact
     const contact = new Contact(req.body);
     console.log('Created contact object:', contact);
     
     const savedContact = await contact.save();
     console.log('Successfully saved contact:', savedContact);
     
-    // Send success response
-    const response = {
+    res.status(201).json({
       success: true,
       data: savedContact,
       message: 'Contact form submitted successfully'
-    };
-    
-    console.log('Sending response:', response);
-    return res.status(201).json(response);
-    
+    });
   } catch (error: any) {
     console.error('Error in /api/contact:', error);
     console.error('Error stack:', error.stack);
     
     // Handle validation errors
     if (error.name === 'ValidationError') {
-      const response = {
+      res.status(400).json({
         success: false,
         error: 'Validation Error',
         message: error.message,
         details: Object.values(error.errors).map((err: any) => err.message)
-      };
-      console.log('Sending validation error response:', response);
-      return res.status(400).json(response);
-    }
-    
-    // Handle mongoose errors
-    if (error.name === 'MongoError' || error.name === 'MongoServerError') {
-      const response = {
-        success: false,
-        error: 'Database Error',
-        message: 'A database error occurred'
-      };
-      console.log('Sending database error response:', response);
-      return res.status(500).json(response);
+      });
+      return;
     }
     
     // Handle other errors
-    const response = {
+    res.status(500).json({
       success: false,
       error: 'Server Error',
       message: 'An error occurred while processing your request'
-    };
-    console.log('Sending server error response:', response);
-    return res.status(500).json(response);
+    });
   }
 });
 
@@ -246,93 +196,19 @@ app.get('/api/contact', async (_req: Request, res: Response) => {
 // Error handling middleware
 app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
   console.error('Error in middleware:', err);
-  console.error('Error stack:', err.stack);
-  
-  // Ensure we always send a valid JSON response
-  try {
-    // Handle JSON parsing errors
-    if (err instanceof SyntaxError && 'body' in err) {
-      const response = {
-        success: false,
-        error: 'Invalid JSON',
-        message: 'The request body contains invalid JSON'
-      };
-      console.log('Sending JSON parsing error response:', response);
-      return res.status(400).json(response);
-    }
-    
-    // Handle file type errors
-    if (err.message && err.message.includes('Invalid file type')) {
-      const response = {
-        success: false,
-        error: 'Invalid File Type',
-        message: err.message
-      };
-      console.log('Sending file type error response:', response);
-      return res.status(400).json(response);
-    }
-    
-    // Handle validation errors
-    if (err.name === 'ValidationError') {
-      const response = {
-        success: false,
-        error: 'Validation Error',
-        message: err.message,
-        details: Object.values(err.errors).map((e: any) => e.message)
-      };
-      console.log('Sending validation error response:', response);
-      return res.status(400).json(response);
-    }
-    
-    // Handle mongoose errors
-    if (err.name === 'MongoError' || err.name === 'MongoServerError') {
-      const response = {
-        success: false,
-        error: 'Database Error',
-        message: 'A database error occurred'
-      };
-      console.log('Sending database error response:', response);
-      return res.status(500).json(response);
-    }
-    
-    // Handle other errors
-    const response = {
-      success: false,
-      error: 'Server Error',
-      message: err.message || 'An unexpected error occurred'
-    };
-    console.log('Sending server error response:', response);
-    return res.status(500).json(response);
-  } catch (error: any) {
-    // If something goes wrong in our error handling, send a safe error response
-    console.error('Error in error handler:', error);
-    const response = {
-      success: false,
-      error: 'Server Error',
-      message: 'An unexpected error occurred'
-    };
-    console.log('Sending fallback error response:', response);
-    return res.status(500).json(response);
+  if (err.message.includes('Invalid file type')) {
+    res.status(400).json({ message: err.message });
+  } else if (err.name === 'SyntaxError') {
+    res.status(400).json({ message: 'Invalid request format' });
+  } else {
+    res.status(500).json({ message: 'Internal server error' });
   }
-});
-
-// Add a catch-all route for undefined routes
-app.use((_req: Request, res: Response) => {
-  res.status(404).json({
-    success: false,
-    error: 'Not Found',
-    message: 'The requested resource was not found'
-  });
 });
 
 // Health check endpoint
 app.get('/api/health', (_req: Request, res: Response) => {
   console.log('GET /api/health route hit.');
-  res.status(200).json({ 
-    success: true,
-    status: 'ok',
-    timestamp: new Date().toISOString()
-  });
+  res.status(200).json({ status: 'ok' });
 });
 
 // Start server

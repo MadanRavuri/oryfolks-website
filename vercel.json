@@ -11,12 +11,12 @@
     }
   ],
   "functions": {
-    "api/**/*.ts": {
-      "runtime": "vercel-edge"
+    "api/dist/index.js": {
+      "runtime": "nodejs18.x"
     }
   },
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/$1" },
+    { "source": "/api/(.*)", "destination": "/api/dist/index.js" },
     { "source": "/(.*)", "destination": "/" }
   ]
 

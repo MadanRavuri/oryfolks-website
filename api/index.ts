@@ -54,11 +54,26 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 // Add request logging middleware
 app.use((req: Request, _res: Response, next: NextFunction) => {
-  console.log(`${req.method} ${req.path}`, {
-    headers: req.headers,
-    body: req.body,
-    query: req.query
-  });
+  console.log('=== Incoming Request ===');
+  console.log(`${req.method} ${req.path}`);
+  console.log('Headers:', req.headers);
+  console.log('Body:', req.body);
+  console.log('Query:', req.query);
+  console.log('=====================');
+  next();
+});
+
+// Add response logging middleware
+app.use((req: Request, res: Response, next: NextFunction) => {
+  const originalSend = res.send;
+  res.send = function (body) {
+    console.log('=== Outgoing Response ===');
+    console.log(`${req.method} ${req.path}`);
+    console.log('Status:', res.statusCode);
+    console.log('Body:', body);
+    console.log('=====================');
+    return originalSend.call(this, body);
+  };
   next();
 });
 
@@ -144,7 +159,8 @@ app.get('/api/resume', async (_req: Request, res: Response) => {
 
 // Contact Routes
 app.post('/api/contact', async (req: Request, res: Response) => {
-  console.log('POST /api/contact route hit.');
+  console.log('=== Contact Form Submission ===');
+  console.log('Request received at:', new Date().toISOString());
   try {
     // Log the complete request details
     console.log('Request details:', {
@@ -157,11 +173,13 @@ app.post('/api/contact', async (req: Request, res: Response) => {
     
     if (!req.body || Object.keys(req.body).length === 0) {
       console.error('Empty request body received');
-      return res.status(400).json({ 
+      const response = { 
         success: false,
         error: 'Validation Error',
         message: 'Please provide contact information'
-      });
+      };
+      console.log('Sending validation error response:', response);
+      return res.status(400).json(response);
     }
 
     // Validate required fields
@@ -170,11 +188,13 @@ app.post('/api/contact', async (req: Request, res: Response) => {
     
     if (missingFields.length > 0) {
       console.error('Missing required fields:', missingFields);
-      return res.status(400).json({
+      const response = {
         success: false,
         error: 'Validation Error',
         message: `Missing required fields: ${missingFields.join(', ')}`
-      });
+      };
+      console.log('Sending validation error response:', response);
+      return res.status(400).json(response);
     }
 
     // Create and save contact
@@ -191,8 +211,9 @@ app.post('/api/contact', async (req: Request, res: Response) => {
       message: 'Contact form submitted successfully'
     };
     
-    console.log('Sending response:', response);
-    return res.status(201).json(response);
+    console.log('Sending success response:', response);
+    res.status(201).json(response);
+    console.log('Response sent successfully');
     
   } catch (error: any) {
     console.error('Error in /api/contact:', error);
@@ -207,7 +228,9 @@ app.post('/api/contact', async (req: Request, res: Response) => {
         details: Object.values(error.errors).map((err: any) => err.message)
       };
       console.log('Sending validation error response:', response);
-      return res.status(400).json(response);
+      res.status(400).json(response);
+      console.log('Validation error response sent');
+      return;
     }
     
     // Handle mongoose errors
@@ -218,7 +241,9 @@ app.post('/api/contact', async (req: Request, res: Response) => {
         message: 'A database error occurred'
       };
       console.log('Sending database error response:', response);
-      return res.status(500).json(response);
+      res.status(500).json(response);
+      console.log('Database error response sent');
+      return;
     }
     
     // Handle other errors
@@ -228,7 +253,8 @@ app.post('/api/contact', async (req: Request, res: Response) => {
       message: 'An error occurred while processing your request'
     };
     console.log('Sending server error response:', response);
-    return res.status(500).json(response);
+    res.status(500).json(response);
+    console.log('Server error response sent');
   }
 });
 

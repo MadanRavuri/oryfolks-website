@@ -40,6 +40,7 @@ const ContactPage = () => {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
 
+        console.log('Sending request...');
         const response = await fetch(`${config.apiUrl}/contact`, {
           method: 'POST',
           headers: {
@@ -54,6 +55,7 @@ const ContactPage = () => {
 
         // Log response details
         console.log('Response status:', response.status);
+        console.log('Response status text:', response.statusText);
         console.log('Response headers:', Object.fromEntries(response.headers.entries()));
 
         let data;
@@ -63,11 +65,13 @@ const ContactPage = () => {
           console.log('Raw response:', responseText);
           
           if (!responseText) {
-            throw new Error('Empty response received from server');
+            console.error('Empty response received from server');
+            throw new Error('Empty response received from server. Please try again.');
           }
           
           try {
             data = JSON.parse(responseText);
+            console.log('Successfully parsed JSON response:', data);
           } catch (parseError: any) {
             console.error('Error parsing JSON response:', parseError);
             console.error('Invalid JSON response:', responseText);
@@ -77,8 +81,6 @@ const ContactPage = () => {
           console.error('Error handling response:', parseError);
           throw new Error(`Failed to process server response: ${parseError.message}`);
         }
-
-        console.log('Parsed response:', data);
 
         if (!response.ok) {
           const errorMessage = data?.message || data?.error || `Server error: ${response.status}`;

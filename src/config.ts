@@ -1,6 +1,6 @@
 const config = {
   apiUrl: import.meta.env.MODE === 'production'
-    ? '/api'  // Update to a relative path for combined deployment
+    ? 'https://api.oryfolks.com/api'  // Production API URL
     : 'http://localhost:5000/api', // Local development
 };
 

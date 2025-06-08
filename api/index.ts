@@ -151,11 +151,11 @@ app.post('/api/contact', async (req: Request, res: Response) => {
     
     if (!req.body || Object.keys(req.body).length === 0) {
       console.error('Empty request body received');
-      res.status(400).json({ 
-        error: 'Request body is empty',
+      return res.status(400).json({ 
+        success: false,
+        error: 'Validation Error',
         message: 'Please provide contact information'
       });
-      return;
     }
 
     const contact = new Contact(req.body);
@@ -164,7 +164,7 @@ app.post('/api/contact', async (req: Request, res: Response) => {
     const savedContact = await contact.save();
     console.log('Successfully saved contact:', savedContact);
     
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
       data: savedContact,
       message: 'Contact form submitted successfully'
@@ -175,17 +175,16 @@ app.post('/api/contact', async (req: Request, res: Response) => {
     
     // Handle validation errors
     if (error.name === 'ValidationError') {
-      res.status(400).json({
+      return res.status(400).json({
         success: false,
         error: 'Validation Error',
         message: error.message,
         details: Object.values(error.errors).map((err: any) => err.message)
       });
-      return;
     }
     
     // Handle other errors
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       error: 'Server Error',
       message: 'An error occurred while processing your request'

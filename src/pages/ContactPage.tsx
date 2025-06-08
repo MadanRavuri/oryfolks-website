@@ -29,62 +29,84 @@ const ContactPage = () => {
     setIsSubmitting(true);
     setError(null);
     
-    try {
-      console.log('Submitting form to:', `${config.apiUrl}/contact`);
-      console.log('Form data:', formData);
-
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
-
-      const response = await fetch(`${config.apiUrl}/contact`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify(formData),
-        signal: controller.signal
-      });
-
-      clearTimeout(timeoutId);
-
-      let data;
+    const maxRetries = 2;
+    let retryCount = 0;
+    
+    const submitForm = async (): Promise<void> => {
       try {
-        data = await response.json();
-      } catch (parseError) {
-        console.error('Error parsing response:', parseError);
-        throw new Error('Server returned an invalid response');
+        console.log('Submitting form to:', `${config.apiUrl}/contact`);
+        console.log('Form data:', formData);
+
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
+        const response = await fetch(`${config.apiUrl}/contact`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify(formData),
+          signal: controller.signal
+        });
+
+        clearTimeout(timeoutId);
+
+        let data;
+        let responseText;
+        try {
+          responseText = await response.text();
+          data = JSON.parse(responseText);
+        } catch (parseError) {
+          console.error('Error parsing response:', parseError);
+          console.error('Raw response:', responseText);
+          throw new Error('Server returned an invalid response');
+        }
+
+        console.log('Response:', data);
+
+        if (!response.ok) {
+          throw new Error(data.message || `Server error: ${response.status}`);
+        }
+
+        if (!data.success) {
+          throw new Error(data.message || 'Failed to submit form');
+        }
+
+        setIsSubmitted(true);
+        setFormData({
+          name: '',
+          email: '',
+          phone: '',
+          subject: '',
+          message: '',
+        });
+        
+        setTimeout(() => {
+          setIsSubmitted(false);
+        }, 5000);
+      } catch (error: any) {
+        console.error('Error submitting form:', error);
+        
+        if (error.name === 'AbortError') {
+          throw new Error('Request timed out. Please try again.');
+        }
+        
+        if (retryCount < maxRetries) {
+          retryCount++;
+          console.log(`Retrying submission (${retryCount}/${maxRetries})...`);
+          await new Promise(resolve => setTimeout(resolve, 1000 * retryCount)); // Exponential backoff
+          return submitForm();
+        }
+        
+        throw error;
       }
+    };
 
-      console.log('Response:', data);
-
-      if (!response.ok) {
-        throw new Error(data.message || `Server error: ${response.status}`);
-      }
-
-      if (!data.success) {
-        throw new Error(data.message || 'Failed to submit form');
-      }
-
-      setIsSubmitted(true);
-      setFormData({
-        name: '',
-        email: '',
-        phone: '',
-        subject: '',
-        message: '',
-      });
-      
-      setTimeout(() => {
-        setIsSubmitted(false);
-      }, 5000);
+    try {
+      await submitForm();
     } catch (error: any) {
-      console.error('Error submitting form:', error);
-      if (error.name === 'AbortError') {
-        setError('Request timed out. Please try again.');
-      } else {
-        setError(error.message || 'Failed to submit form. Please try again.');
-      }
+      setError(error.message || 'Failed to submit form. Please try again.');
     } finally {
       setIsSubmitting(false);
     }

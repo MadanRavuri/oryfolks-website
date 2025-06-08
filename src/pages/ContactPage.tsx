@@ -48,16 +48,19 @@ const ContactPage = () => {
 
       clearTimeout(timeoutId);
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ message: 'Failed to parse error response' }));
-        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      let data;
+      try {
+        data = await response.json();
+      } catch (parseError) {
+        console.error('Error parsing response:', parseError);
+        throw new Error('Server returned an invalid response');
       }
 
-      const data = await response.json().catch(() => {
-        throw new Error('Failed to parse response data');
-      });
-
       console.log('Response:', data);
+
+      if (!response.ok) {
+        throw new Error(data.message || `Server error: ${response.status}`);
+      }
 
       if (!data.success) {
         throw new Error(data.message || 'Failed to submit form');

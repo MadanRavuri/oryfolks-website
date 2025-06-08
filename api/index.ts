@@ -208,46 +208,79 @@ app.get('/api/contact', async (_req: Request, res: Response) => {
 app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
   console.error('Error in middleware:', err);
   
-  // Handle JSON parsing errors
-  if (err instanceof SyntaxError && 'body' in err) {
-    return res.status(400).json({
+  // Ensure we always send a valid JSON response
+  try {
+    // Handle JSON parsing errors
+    if (err instanceof SyntaxError && 'body' in err) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid JSON',
+        message: 'The request body contains invalid JSON'
+      });
+    }
+    
+    // Handle file type errors
+    if (err.message && err.message.includes('Invalid file type')) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid File Type',
+        message: err.message
+      });
+    }
+    
+    // Handle validation errors
+    if (err.name === 'ValidationError') {
+      return res.status(400).json({
+        success: false,
+        error: 'Validation Error',
+        message: err.message,
+        details: Object.values(err.errors).map((e: any) => e.message)
+      });
+    }
+    
+    // Handle mongoose errors
+    if (err.name === 'MongoError' || err.name === 'MongoServerError') {
+      return res.status(500).json({
+        success: false,
+        error: 'Database Error',
+        message: 'A database error occurred'
+      });
+    }
+    
+    // Handle other errors
+    return res.status(500).json({
       success: false,
-      error: 'Invalid JSON',
-      message: 'The request body contains invalid JSON'
+      error: 'Server Error',
+      message: err.message || 'An unexpected error occurred'
+    });
+  } catch (error) {
+    // If something goes wrong in our error handling, send a safe error response
+    console.error('Error in error handler:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Server Error',
+      message: 'An unexpected error occurred'
     });
   }
-  
-  // Handle file type errors
-  if (err.message.includes('Invalid file type')) {
-    return res.status(400).json({
-      success: false,
-      error: 'Invalid File Type',
-      message: err.message
-    });
-  }
-  
-  // Handle validation errors
-  if (err.name === 'ValidationError') {
-    return res.status(400).json({
-      success: false,
-      error: 'Validation Error',
-      message: err.message,
-      details: Object.values(err.errors).map((e: any) => e.message)
-    });
-  }
-  
-  // Handle other errors
-  return res.status(500).json({
+});
+
+// Add a catch-all route for undefined routes
+app.use((_req: Request, res: Response) => {
+  res.status(404).json({
     success: false,
-    error: 'Server Error',
-    message: 'An unexpected error occurred'
+    error: 'Not Found',
+    message: 'The requested resource was not found'
   });
 });
 
 // Health check endpoint
 app.get('/api/health', (_req: Request, res: Response) => {
   console.log('GET /api/health route hit.');
-  res.status(200).json({ status: 'ok' });
+  res.status(200).json({ 
+    success: true,
+    status: 'ok',
+    timestamp: new Date().toISOString()
+  });
 });
 
 // Start server

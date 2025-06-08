@@ -198,6 +198,8 @@ app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
   console.error('Error in middleware:', err);
   if (err.message.includes('Invalid file type')) {
     res.status(400).json({ message: err.message });
+  } else if (err.name === 'SyntaxError') {
+    res.status(400).json({ message: 'Invalid request format' });
   } else {
     res.status(500).json({ message: 'Internal server error' });
   }

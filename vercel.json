@@ -11,12 +11,12 @@
     }
   ],
   "functions": {
-    "api/dist/index.js": {
+    "api/**/*.ts": {
       "runtime": "nodejs@18.x"
     }
   },
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/dist/index.js" },
+    { "source": "/api/(.*)", "destination": "/api/$1" },
     { "source": "/(.*)", "destination": "/" }
   ]
 

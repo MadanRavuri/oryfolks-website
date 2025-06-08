@@ -12,12 +12,11 @@
   ],
   "functions": {
     "api/**/*.ts": {
-      "runtime": "vercel-edge"
+      "runtime": "@vercel/node@2.15.8"
     }
   },
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/$1" },
     { "source": "/(.*)", "destination": "/" }
   ]
-
 } 

@@ -1,6 +1,6 @@
 const config = {
   apiUrl: import.meta.env.MODE === 'production'
-    ? '/api'  // Update to a relative path for combined deployment
+    ? 'https://oryfolks-website-madanravuri.vercel.app/api'  // Production API URL
     : 'http://localhost:5000/api', // Local development
 };
 

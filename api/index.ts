@@ -19,11 +19,13 @@ const allowedOrigins = [
   'https://www.oryfolks.com',
   'https://oryfolks-website-git-main-madan-ravuris-projects.vercel.app',
   'https://oryfolks-website-ojqfs9f65-madan-ravuris-projects.vercel.app',
-  'http://localhost:5173', // for local development
-  'http://localhost:3000', // additional local development port
-  'http://127.0.0.1:5173', // additional local development URL
-  'http://127.0.0.1:3000',  // additional local development URL
-  'https://oryfolks-website-n2aw.vercel.app'
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'http://127.0.0.1:5173',
+  'http://127.0.0.1:3000',
+  'https://oryfolks-website-n2aw.vercel.app',
+  'https://oryfolks-website-git-main-madanravuri.vercel.app',
+  'https://oryfolks-website-madanravuri.vercel.app'
 ];
 
 // CORS middleware configuration
@@ -33,13 +35,15 @@ app.use(cors({
     if (!origin) return callback(null, true);
     
     if (allowedOrigins.indexOf(origin) === -1) {
+      console.log('CORS blocked request from origin:', origin);
       const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
       return callback(new Error(msg), false);
     }
+    console.log('CORS allowed request from origin:', origin);
     return callback(null, true);
   },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
   credentials: true,
   preflightContinue: false,
   optionsSuccessStatus: 204
@@ -56,9 +60,9 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use((req: Request, _res: Response, next: NextFunction) => {
   console.log('=== Incoming Request ===');
   console.log(`${req.method} ${req.path}`);
-  console.log('Headers:', req.headers);
-  console.log('Body:', req.body);
-  console.log('Query:', req.query);
+  console.log('Headers:', JSON.stringify(req.headers, null, 2));
+  console.log('Body:', JSON.stringify(req.body, null, 2));
+  console.log('Query:', JSON.stringify(req.query, null, 2));
   console.log('=====================');
   next();
 });
@@ -70,7 +74,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
     console.log('=== Outgoing Response ===');
     console.log(`${req.method} ${req.path}`);
     console.log('Status:', res.statusCode);
-    console.log('Body:', body);
+    console.log('Body:', typeof body === 'string' ? body : JSON.stringify(body, null, 2));
     console.log('=====================');
     return originalSend.call(this, body);
   };

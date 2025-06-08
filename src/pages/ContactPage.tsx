@@ -40,6 +40,7 @@ const ContactPage = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json'
         },
         body: JSON.stringify(formData),
         signal: controller.signal
@@ -47,10 +48,18 @@ const ContactPage = () => {
 
       clearTimeout(timeoutId);
 
-      const data = await response.json();
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: 'Failed to parse error response' }));
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json().catch(() => {
+        throw new Error('Failed to parse response data');
+      });
+
       console.log('Response:', data);
 
-      if (!response.ok) {
+      if (!data.success) {
         throw new Error(data.message || 'Failed to submit form');
       }
 

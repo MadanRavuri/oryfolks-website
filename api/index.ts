@@ -49,7 +49,18 @@ app.use(cors({
 app.options('*', cors());
 
 // Middleware
-app.use(express.json({ limit: '50mb' }));
+app.use(express.json({ limit: '50mb', strict: true }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+
+// Add request logging middleware
+app.use((req: Request, _res: Response, next: NextFunction) => {
+  console.log(`${req.method} ${req.path}`, {
+    headers: req.headers,
+    body: req.body,
+    query: req.query
+  });
+  next();
+});
 
 // Configure multer for memory storage (for serverless environment)
 const upload = multer({ 
@@ -196,13 +207,41 @@ app.get('/api/contact', async (_req: Request, res: Response) => {
 // Error handling middleware
 app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
   console.error('Error in middleware:', err);
-  if (err.message.includes('Invalid file type')) {
-    res.status(400).json({ message: err.message });
-  } else if (err.name === 'SyntaxError') {
-    res.status(400).json({ message: 'Invalid request format' });
-  } else {
-    res.status(500).json({ message: 'Internal server error' });
+  
+  // Handle JSON parsing errors
+  if (err instanceof SyntaxError && 'body' in err) {
+    return res.status(400).json({
+      success: false,
+      error: 'Invalid JSON',
+      message: 'The request body contains invalid JSON'
+    });
   }
+  
+  // Handle file type errors
+  if (err.message.includes('Invalid file type')) {
+    return res.status(400).json({
+      success: false,
+      error: 'Invalid File Type',
+      message: err.message
+    });
+  }
+  
+  // Handle validation errors
+  if (err.name === 'ValidationError') {
+    return res.status(400).json({
+      success: false,
+      error: 'Validation Error',
+      message: err.message,
+      details: Object.values(err.errors).map((e: any) => e.message)
+    });
+  }
+  
+  // Handle other errors
+  return res.status(500).json({
+    success: false,
+    error: 'Server Error',
+    message: 'An unexpected error occurred'
+  });
 });
 
 // Health check endpoint

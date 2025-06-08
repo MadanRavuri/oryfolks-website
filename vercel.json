@@ -1,18 +1,18 @@
 {
   "version": 2,
+  "functions": {
+    "api/index.ts": {
+      "runtime": "nodejs22.x",
+      "includeFiles": ["api/models/**/*.ts"]
+    }
+  },
   "builds": [
-    {
-      "src": "api/index.ts",
-      "use": "@vercel/node",
-      "config": {
-        "includeFiles": ["api/models/**/*.ts"]
-      }
-    },
     {
       "src": "package.json",
       "use": "@vercel/static-build",
       "config": {
-        "distDir": "dist"
+        "buildCommand": "npm run build",
+        "outputDirectory": "dist"
       }
     }
   ],

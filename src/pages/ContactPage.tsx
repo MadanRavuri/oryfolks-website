@@ -29,7 +29,7 @@ const ContactPage = () => {
     setIsSubmitting(true);
     setError(null);
     
-    const maxRetries = 3;
+    const maxRetries = 2;
     let retryCount = 0;
     
     const submitForm = async (): Promise<void> => {
@@ -38,7 +38,7 @@ const ContactPage = () => {
         console.log('Form data:', formData);
 
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
 
         console.log('Sending request...');
         const response = await fetch(`${config.apiUrl}/contact`, {
@@ -48,8 +48,7 @@ const ContactPage = () => {
             'Accept': 'application/json'
           },
           body: JSON.stringify(formData),
-          signal: controller.signal,
-          credentials: 'include'
+          signal: controller.signal
         });
 
         clearTimeout(timeoutId);
@@ -117,9 +116,8 @@ const ContactPage = () => {
         
         if (retryCount < maxRetries) {
           retryCount++;
-          const delay = Math.min(1000 * Math.pow(2, retryCount), 10000); // Exponential backoff with max 10s
-          console.log(`Retrying submission (${retryCount}/${maxRetries}) after ${delay}ms...`);
-          await new Promise(resolve => setTimeout(resolve, delay));
+          console.log(`Retrying submission (${retryCount}/${maxRetries})...`);
+          await new Promise(resolve => setTimeout(resolve, 1000 * retryCount)); // Exponential backoff
           return submitForm();
         }
         

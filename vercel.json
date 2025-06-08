@@ -23,6 +23,10 @@
       "dest": "/dist/assets/$1"
     },
     {
+      "src": "/(.*\\..*)",
+      "dest": "/dist/$1"
+    },
+    {
       "src": "/(.*)",
       "dest": "/index.html"
     }

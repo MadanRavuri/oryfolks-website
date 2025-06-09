@@ -63,7 +63,7 @@ const ApplicationForm = () => {
         method: 'POST',
         body: formDataToSend,
         signal: controller.signal,
-        credentials: 'include' // Include credentials if needed
+        credentials: 'include'
       });
 
       clearTimeout(timeoutId);
@@ -72,14 +72,12 @@ const ApplicationForm = () => {
       console.log('Response headers:', Object.fromEntries(response.headers.entries()));
 
       let data;
-      const contentType = response.headers.get('content-type');
-      if (contentType && contentType.includes('application/json')) {
+      try {
         data = await response.json();
         console.log('Response data:', data);
-      } else {
-        const text = await response.text();
-        console.error('Non-JSON response:', text);
-        throw new Error('Server returned non-JSON response');
+      } catch (parseError) {
+        console.error('Error parsing response:', parseError);
+        throw new Error('Server returned invalid response format');
       }
 
       if (!response.ok) {

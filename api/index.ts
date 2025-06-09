@@ -261,12 +261,24 @@ app.get('/api/contact', async (_req: Request, res: Response) => {
 // Error handling middleware
 app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
   console.error('Error in middleware:', err);
+  
+  // Ensure we always return JSON responses
   if (err.message.includes('Invalid file type')) {
-    res.status(400).json({ message: err.message });
+    return res.status(400).json({ 
+      success: false,
+      message: err.message 
+    });
   } else if (err.name === 'SyntaxError') {
-    res.status(400).json({ message: 'Invalid request format' });
+    return res.status(400).json({ 
+      success: false,
+      message: 'Invalid request format' 
+    });
   } else {
-    res.status(500).json({ message: 'Internal server error' });
+    return res.status(500).json({ 
+      success: false,
+      message: 'Internal server error',
+      error: err.message 
+    });
   }
 });
 

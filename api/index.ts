@@ -4,6 +4,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import multer from 'multer';
 import path from 'path';
+import fs from 'fs';
 import Resume from './models/Resume';
 import Contact from './models/Contact';
 
@@ -11,6 +12,7 @@ dotenv.config();
 console.log('Serverless function starting up...');
 
 const app = express();
+const port = process.env.PORT || 3001;
 
 // CORS configuration for production
 const allowedOrigins = [
@@ -51,9 +53,25 @@ app.options('*', cors());
 // Middleware
 app.use(express.json({ limit: '50mb' }));
 
-// Configure multer for memory storage (for serverless environment)
+// Create uploads directory if it doesn't exist
+const uploadsDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
+// Configure multer for disk storage
+const storage = multer.diskStorage({
+  destination: (_req, _file, cb) => {
+    cb(null, uploadsDir);
+  },
+  filename: (_req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
 const upload = multer({ 
-  storage: multer.memoryStorage(),
+  storage: storage,
   limits: {
     fileSize: 5 * 1024 * 1024 // 5MB limit
   },
@@ -99,13 +117,9 @@ app.post('/api/resume', upload.single('resumeFile'), async (req: Request, res: R
       return;
     }
 
-    // Store file in base64 format
-    const fileBase64 = file.buffer.toString('base64');
-    const fileData = `data:${file.mimetype};base64,${fileBase64}`;
-
     const resumeData = {
       ...req.body,
-      resumeFile: fileData,
+      resumeFile: file.filename, // Store the filename instead of base64
       skills: req.body.skills.split(',').map((skill: string) => skill.trim())
     };
 
@@ -118,6 +132,25 @@ app.post('/api/resume', upload.single('resumeFile'), async (req: Request, res: R
     console.error('Error saving resume:', error);
     res.status(500).json({ message: 'Error saving resume' });
   }
+});
+
+// Serve uploaded files
+app.get('/uploads/:filename', (req: Request, res: Response) => {
+  const filename = req.params.filename;
+  const filePath = path.join(uploadsDir, filename);
+  
+  // Check if file exists
+  if (!fs.existsSync(filePath)) {
+    return res.status(404).json({ message: 'File not found' });
+  }
+
+  // Set appropriate headers
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
+  
+  // Stream the file
+  const fileStream = fs.createReadStream(filePath);
+  fileStream.pipe(res);
 });
 
 app.get('/api/resume', async (_req: Request, res: Response) => {
@@ -211,10 +244,8 @@ app.get('/api/health', (_req: Request, res: Response) => {
   res.status(200).json({ status: 'ok' });
 });
 
-// Start server
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
 });
 
 export default app; 

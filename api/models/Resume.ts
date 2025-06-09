@@ -8,7 +8,7 @@ export interface IResume extends Document {
   experience: string;
   education: string;
   skills: string[];
-  resumeFile: string; // Base64 encoded file
+  resumeFile: string; // File path
   createdAt: Date;
 }
 
@@ -20,7 +20,7 @@ const ResumeSchema: Schema = new Schema({
   experience: { type: String, required: true },
   education: { type: String, required: true },
   skills: [{ type: String }],
-  resumeFile: { type: String, required: true }, // Store base64 data
+  resumeFile: { type: String, required: true }, // Store file path
   createdAt: { type: Date, default: Date.now }
 });
 

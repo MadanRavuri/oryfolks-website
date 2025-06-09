@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
+import os from 'os';
 import Resume from './models/Resume';
 import Contact from './models/Contact';
 
@@ -53,25 +54,9 @@ app.options('*', cors());
 // Middleware
 app.use(express.json({ limit: '50mb' }));
 
-// Create uploads directory if it doesn't exist
-const uploadsDir = path.join(__dirname, 'uploads');
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
-}
-
-// Configure multer for disk storage
-const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => {
-    cb(null, uploadsDir);
-  },
-  filename: (_req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, uniqueSuffix + path.extname(file.originalname));
-  }
-});
-
+// Configure multer for memory storage (for serverless environment)
 const upload = multer({ 
-  storage: storage,
+  storage: multer.memoryStorage(),
   limits: {
     fileSize: 5 * 1024 * 1024 // 5MB limit
   },
@@ -130,9 +115,13 @@ app.post('/api/resume', upload.single('resumeFile'), async (req: Request, res: R
       });
     }
 
+    // Store file in base64 format
+    const fileBase64 = file.buffer.toString('base64');
+    const fileData = `data:${file.mimetype};base64,${fileBase64}`;
+
     const resumeData = {
       ...req.body,
-      resumeFile: file.filename,
+      resumeFile: fileData,
       skills: req.body.skills.split(',').map((skill: string) => skill.trim())
     };
 

@@ -71,12 +71,18 @@ const ApplicationForm = () => {
       console.log('Response status:', response.status);
       console.log('Response headers:', Object.fromEntries(response.headers.entries()));
 
+      // Log the raw response text first
+      const responseText = await response.text();
+      console.log('Raw response:', responseText);
+
       let data;
       try {
-        data = await response.json();
-        console.log('Response data:', data);
+        // Try to parse the response text as JSON
+        data = JSON.parse(responseText);
+        console.log('Parsed response data:', data);
       } catch (parseError) {
         console.error('Error parsing response:', parseError);
+        console.error('Response text that failed to parse:', responseText);
         throw new Error('Server returned invalid response format');
       }
 

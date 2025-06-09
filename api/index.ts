@@ -139,6 +139,8 @@ app.post('/api/resume', upload.single('resumeFile'), async (req: Request, res: R
     const resume = new Resume(resumeData);
     const savedResume = await resume.save();
     
+    // Set content type header explicitly
+    res.setHeader('Content-Type', 'application/json');
     return res.status(201).json({
       success: true,
       data: savedResume,
@@ -147,6 +149,9 @@ app.post('/api/resume', upload.single('resumeFile'), async (req: Request, res: R
 
   } catch (error: any) {
     console.error('Error saving resume:', error);
+    
+    // Set content type header explicitly
+    res.setHeader('Content-Type', 'application/json');
     
     // Handle validation errors
     if (error.name === 'ValidationError') {
@@ -261,6 +266,9 @@ app.get('/api/contact', async (_req: Request, res: Response) => {
 // Error handling middleware
 app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
   console.error('Error in middleware:', err);
+  
+  // Set content type header explicitly
+  res.setHeader('Content-Type', 'application/json');
   
   // Ensure we always return JSON responses
   if (err.message.includes('Invalid file type')) {

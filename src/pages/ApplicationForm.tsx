@@ -53,18 +53,34 @@ const ApplicationForm = () => {
         }
       });
 
+      console.log('Submitting to:', `${config.apiUrl}/resume`);
+      console.log('Form data:', Object.fromEntries(formDataToSend.entries()));
+
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout for file upload
 
       const response = await fetch(`${config.apiUrl}/resume`, {
         method: 'POST',
         body: formDataToSend,
-        signal: controller.signal
+        signal: controller.signal,
+        credentials: 'include' // Include credentials if needed
       });
 
       clearTimeout(timeoutId);
 
-      const data = await response.json();
+      console.log('Response status:', response.status);
+      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+
+      let data;
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        data = await response.json();
+        console.log('Response data:', data);
+      } else {
+        const text = await response.text();
+        console.error('Non-JSON response:', text);
+        throw new Error('Server returned non-JSON response');
+      }
 
       if (!response.ok) {
         throw new Error(data.message || 'Failed to submit application');

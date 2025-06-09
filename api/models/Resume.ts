@@ -8,7 +8,7 @@ export interface IResume extends Document {
   experience: string;
   education: string;
   skills: string[];
-  resumeFile: string; // Base64 encoded file
+  resumeFileId: mongoose.Types.ObjectId; // GridFS file ID
   createdAt: Date;
 }
 
@@ -20,7 +20,7 @@ const ResumeSchema: Schema = new Schema({
   experience: { type: String, required: true },
   education: { type: String, required: true },
   skills: [{ type: String }],
-  resumeFile: { type: String, required: true }, // Store base64 data
+  resumeFileId: { type: Schema.Types.ObjectId, required: true }, // Store GridFS file ID
   createdAt: { type: Date, default: Date.now }
 });
 

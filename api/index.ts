@@ -4,8 +4,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import multer from 'multer';
 import path from 'path';
-import fs from 'fs';
-import os from 'os';
+import { GridFSBucket } from 'mongodb';
 import Resume from './models/Resume';
 import Contact from './models/Contact';
 
@@ -89,6 +88,14 @@ const connectDB = async () => {
 
 connectDB();
 
+// Initialize GridFS bucket
+let bucket: GridFSBucket;
+mongoose.connection.once('open', () => {
+  bucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db, {
+    bucketName: 'resumes'
+  });
+});
+
 // Resume Routes
 app.post('/api/resume', upload.single('resumeFile'), async (req: Request, res: Response) => {
   console.log('POST /api/resume route hit.');
@@ -115,13 +122,28 @@ app.post('/api/resume', upload.single('resumeFile'), async (req: Request, res: R
       });
     }
 
-    // Store file in base64 format
-    const fileBase64 = file.buffer.toString('base64');
-    const fileData = `data:${file.mimetype};base64,${fileBase64}`;
+    // Upload file to GridFS
+    const uploadStream = bucket.openUploadStream(file.originalname, {
+      contentType: file.mimetype,
+      metadata: {
+        originalName: file.originalname,
+        uploadDate: new Date()
+      }
+    });
+
+    // Write the file buffer to GridFS
+    uploadStream.write(file.buffer);
+    uploadStream.end();
+
+    // Wait for the upload to complete
+    await new Promise((resolve, reject) => {
+      uploadStream.on('finish', resolve);
+      uploadStream.on('error', reject);
+    });
 
     const resumeData = {
       ...req.body,
-      resumeFile: fileData,
+      resumeFileId: uploadStream.id,
       skills: req.body.skills.split(',').map((skill: string) => skill.trim())
     };
 
@@ -160,6 +182,35 @@ app.post('/api/resume', upload.single('resumeFile'), async (req: Request, res: R
   }
 });
 
+// Get resume file
+app.get('/api/resume/:id/file', async (req: Request, res: Response) => {
+  try {
+    const resume = await Resume.findById(req.params.id);
+    if (!resume) {
+      return res.status(404).json({
+        success: false,
+        message: 'Resume not found'
+      });
+    }
+
+    const downloadStream = bucket.openDownloadStream(resume.resumeFileId);
+    
+    // Set appropriate headers
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `inline; filename="${resume.name}'s resume.pdf"`);
+    
+    // Pipe the file to the response
+    downloadStream.pipe(res);
+  } catch (error: any) {
+    console.error('Error fetching resume file:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching resume file',
+      error: error.message
+    });
+  }
+});
+
 app.get('/api/resume', async (_req: Request, res: Response) => {
   console.log('GET /api/resume route hit.');
   try {
@@ -168,30 +219,6 @@ app.get('/api/resume', async (_req: Request, res: Response) => {
   } catch (error: any) {
     console.error('Error fetching resumes:', error);
     res.status(500).json({ message: 'Error fetching resumes' });
-  }
-});
-
-// Get a specific resume's PDF
-app.get('/api/resume/:id/pdf', async (req: Request, res: Response) => {
-  try {
-    const resume = await Resume.findById(req.params.id);
-    if (!resume) {
-      return res.status(404).json({ message: 'Resume not found' });
-    }
-
-    // Extract the base64 data from the data URL
-    const base64Data = resume.resumeFile.split(',')[1];
-    const buffer = Buffer.from(base64Data, 'base64');
-
-    // Set appropriate headers
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `inline; filename="resume-${resume.name}.pdf"`);
-    
-    // Send the PDF data
-    res.send(buffer);
-  } catch (error: any) {
-    console.error('Error serving PDF:', error);
-    res.status(500).json({ message: 'Error serving PDF' });
   }
 });
 

@@ -171,6 +171,30 @@ app.get('/api/resume', async (_req: Request, res: Response) => {
   }
 });
 
+// Get a specific resume's PDF
+app.get('/api/resume/:id/pdf', async (req: Request, res: Response) => {
+  try {
+    const resume = await Resume.findById(req.params.id);
+    if (!resume) {
+      return res.status(404).json({ message: 'Resume not found' });
+    }
+
+    // Extract the base64 data from the data URL
+    const base64Data = resume.resumeFile.split(',')[1];
+    const buffer = Buffer.from(base64Data, 'base64');
+
+    // Set appropriate headers
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `inline; filename="resume-${resume.name}.pdf"`);
+    
+    // Send the PDF data
+    res.send(buffer);
+  } catch (error: any) {
+    console.error('Error serving PDF:', error);
+    res.status(500).json({ message: 'Error serving PDF' });
+  }
+});
+
 // Contact Routes
 app.post('/api/contact', async (req: Request, res: Response) => {
   console.log('POST /api/contact route hit.');

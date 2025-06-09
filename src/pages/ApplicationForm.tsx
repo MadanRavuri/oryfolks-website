@@ -1,10 +1,23 @@
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, Send } from 'lucide-react';
 import Hero from '../components/Hero';
 import Section from '../components/Section';
 import Button from '../components/Button';
 import config from '../config';
+
+interface Resume {
+  _id: string;
+  name: string;
+  email: string;
+  phone: string;
+  position: string;
+  experience: string;
+  education: string;
+  skills: string[];
+  resumeFile: string;
+  createdAt: string;
+}
 
 const ApplicationForm = () => {
   const navigate = useNavigate();
@@ -24,6 +37,23 @@ const ApplicationForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [resumes, setResumes] = useState<Resume[]>([]);
+
+  // Fetch resumes when component mounts
+  useEffect(() => {
+    const fetchResumes = async () => {
+      try {
+        const response = await fetch(`${config.apiUrl}/resume`);
+        if (!response.ok) throw new Error('Failed to fetch resumes');
+        const data = await response.json();
+        setResumes(data);
+      } catch (error) {
+        console.error('Error fetching resumes:', error);
+      }
+    };
+
+    fetchResumes();
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -119,6 +149,32 @@ const ApplicationForm = () => {
       }
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  // Function to view PDF in a new tab
+  const viewPDF = (resumeId: string) => {
+    window.open(`${config.apiUrl}/resume/${resumeId}/pdf`, '_blank');
+  };
+
+  // Function to download PDF
+  const downloadPDF = async (resumeId: string, fileName: string) => {
+    try {
+      const response = await fetch(`${config.apiUrl}/resume/${resumeId}/pdf`);
+      if (!response.ok) throw new Error('Failed to download PDF');
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `resume-${fileName}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error('Error downloading PDF:', error);
+      alert('Failed to download PDF. Please try again.');
     }
   };
 
@@ -295,6 +351,39 @@ const ApplicationForm = () => {
                   <Send size={16} className="ml-2" />
                 </Button>
               </form>
+            )}
+
+            {/* Add this section to display submitted resumes */}
+            {resumes.length > 0 && (
+              <div className="mt-8">
+                <h3 className="text-xl font-semibold mb-4">Submitted Resumes</h3>
+                <div className="space-y-4">
+                  {resumes.map((resume) => (
+                    <div key={resume._id} className="border p-4 rounded-lg">
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <p className="font-medium">{resume.name}</p>
+                          <p className="text-sm text-gray-600">{resume.position}</p>
+                        </div>
+                        <div className="space-x-2">
+                          <button
+                            onClick={() => viewPDF(resume._id)}
+                            className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
+                          >
+                            View
+                          </button>
+                          <button
+                            onClick={() => downloadPDF(resume._id, resume.name)}
+                            className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600"
+                          >
+                            Download
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             )}
           </div>
         </div>

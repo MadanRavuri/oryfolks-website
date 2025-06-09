@@ -33,7 +33,7 @@ const AdminResumes = () => {
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     // Replace 'your-secure-password' with your actual admin password
-    if (password === 'your-secure-password') {
+    if (password === 'oryfolks') {
       setIsAuthenticated(true);
       localStorage.setItem('adminAuth', 'true');
       fetchResumes();

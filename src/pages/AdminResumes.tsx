@@ -25,42 +25,70 @@ const AdminResumes = () => {
 
   // Check if already authenticated
   useEffect(() => {
-    console.log('Checking authentication status');
-    const auth = localStorage.getItem('adminAuth');
-    console.log('Auth status:', auth);
-    if (auth === 'true') {
-      setIsAuthenticated(true);
-      fetchResumes();
+    try {
+      console.log('Checking authentication status');
+      const auth = localStorage.getItem('adminAuth');
+      console.log('Auth status:', auth);
+      if (auth === 'true') {
+        setIsAuthenticated(true);
+        fetchResumes();
+      }
+    } catch (err) {
+      console.error('Error in auth check:', err);
+      setError('Error checking authentication status');
     }
   }, []);
 
   const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log('Login attempt');
-    if (password === 'oryfolks') {
-      console.log('Login successful');
-      setIsAuthenticated(true);
-      localStorage.setItem('adminAuth', 'true');
-      fetchResumes();
-    } else {
-      console.log('Login failed');
-      setError('Invalid password');
+    try {
+      e.preventDefault();
+      console.log('Login attempt');
+      if (password === 'oryfolks') {
+        console.log('Login successful');
+        setIsAuthenticated(true);
+        localStorage.setItem('adminAuth', 'true');
+        fetchResumes();
+      } else {
+        console.log('Login failed');
+        setError('Invalid password');
+      }
+    } catch (err) {
+      console.error('Error in login:', err);
+      setError('Error during login');
     }
   };
 
   const handleLogout = () => {
-    console.log('Logging out');
-    setIsAuthenticated(false);
-    localStorage.removeItem('adminAuth');
-    setResumes([]);
+    try {
+      console.log('Logging out');
+      setIsAuthenticated(false);
+      localStorage.removeItem('adminAuth');
+      setResumes([]);
+    } catch (err) {
+      console.error('Error in logout:', err);
+      setError('Error during logout');
+    }
   };
 
   const fetchResumes = async () => {
     console.log('Fetching resumes');
     try {
+      console.log('API URL:', config.apiUrl);
       const response = await fetch(`${config.apiUrl}/resume`);
-      console.log('API Response:', response);
-      const data = await response.json();
+      console.log('API Response status:', response.status);
+      console.log('API Response headers:', Object.fromEntries(response.headers.entries()));
+      
+      const responseText = await response.text();
+      console.log('Raw response:', responseText);
+      
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error('Error parsing response:', parseError);
+        throw new Error('Invalid response format from server');
+      }
+      
       console.log('API Data:', data);
       
       if (!data.success) {
@@ -97,6 +125,46 @@ const AdminResumes = () => {
     }
   };
 
+  // Show error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-md w-full space-y-8">
+          <div>
+            <h2 className="mt-6 text-center text-3xl font-extrabold text-red-600">
+              Error
+            </h2>
+            <p className="mt-2 text-center text-sm text-gray-600">
+              {error}
+            </p>
+            <button
+              onClick={() => window.location.reload()}
+              className="mt-4 w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-md w-full space-y-8">
+          <div>
+            <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+              Loading...
+            </h2>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show login form if not authenticated
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -128,10 +196,6 @@ const AdminResumes = () => {
               </div>
             </div>
 
-            {error && (
-              <div className="text-red-600 text-sm text-center">{error}</div>
-            )}
-
             <div>
               <button
                 type="submit"
@@ -149,18 +213,7 @@ const AdminResumes = () => {
     );
   }
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center">
-            <h2 className="text-2xl font-semibold text-gray-900">Loading resumes...</h2>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
+  // Show resumes list
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
@@ -176,12 +229,6 @@ const AdminResumes = () => {
             Logout
           </button>
         </div>
-
-        {error && (
-          <div className="mb-6 bg-red-50 border border-red-200 text-red-800 rounded-md p-4">
-            <p className="font-medium">Error: {error}</p>
-          </div>
-        )}
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {resumes.map((resume) => (

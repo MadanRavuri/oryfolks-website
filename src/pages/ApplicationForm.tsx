@@ -70,6 +70,10 @@ const ApplicationForm = () => {
         throw new Error(data.message || 'Failed to submit application');
       }
 
+      if (!data.success) {
+        throw new Error(data.message || 'Failed to submit application');
+      }
+
       setIsSubmitted(true);
       setFormData({
         name: '',

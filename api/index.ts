@@ -113,24 +113,56 @@ app.post('/api/resume', upload.single('resumeFile'), async (req: Request, res: R
     console.log('Received file:', file);
 
     if (!file) {
-      res.status(400).json({ message: 'Resume file is required' });
-      return;
+      return res.status(400).json({ 
+        success: false,
+        message: 'Resume file is required' 
+      });
+    }
+
+    // Validate required fields
+    const requiredFields = ['name', 'email', 'phone', 'position', 'experience', 'education', 'skills'];
+    const missingFields = requiredFields.filter(field => !req.body[field]);
+    
+    if (missingFields.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: `Missing required fields: ${missingFields.join(', ')}`
+      });
     }
 
     const resumeData = {
       ...req.body,
-      resumeFile: file.filename, // Store the filename instead of base64
+      resumeFile: file.filename,
       skills: req.body.skills.split(',').map((skill: string) => skill.trim())
     };
 
     const resume = new Resume(resumeData);
     const savedResume = await resume.save();
-    console.log('Saved resume:', savedResume);
-    res.status(201).json(savedResume);
+    
+    return res.status(201).json({
+      success: true,
+      data: savedResume,
+      message: 'Resume submitted successfully'
+    });
 
   } catch (error: any) {
     console.error('Error saving resume:', error);
-    res.status(500).json({ message: 'Error saving resume' });
+    
+    // Handle validation errors
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({
+        success: false,
+        message: 'Validation Error',
+        errors: Object.values(error.errors).map((err: any) => err.message)
+      });
+    }
+
+    // Handle other errors
+    return res.status(500).json({
+      success: false,
+      message: 'Error saving resume',
+      error: error.message
+    });
   }
 });
 

@@ -15,6 +15,8 @@ interface Resume {
 }
 
 const AdminResumes = () => {
+  console.log('AdminResumes component rendering');
+  
   const [resumes, setResumes] = useState<Resume[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -23,7 +25,9 @@ const AdminResumes = () => {
 
   // Check if already authenticated
   useEffect(() => {
+    console.log('Checking authentication status');
     const auth = localStorage.getItem('adminAuth');
+    console.log('Auth status:', auth);
     if (auth === 'true') {
       setIsAuthenticated(true);
       fetchResumes();
@@ -32,26 +36,32 @@ const AdminResumes = () => {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    // Replace 'your-secure-password' with your actual admin password
+    console.log('Login attempt');
     if (password === 'oryfolks') {
+      console.log('Login successful');
       setIsAuthenticated(true);
       localStorage.setItem('adminAuth', 'true');
       fetchResumes();
     } else {
+      console.log('Login failed');
       setError('Invalid password');
     }
   };
 
   const handleLogout = () => {
+    console.log('Logging out');
     setIsAuthenticated(false);
     localStorage.removeItem('adminAuth');
     setResumes([]);
   };
 
   const fetchResumes = async () => {
+    console.log('Fetching resumes');
     try {
       const response = await fetch(`${config.apiUrl}/resume`);
+      console.log('API Response:', response);
       const data = await response.json();
+      console.log('API Data:', data);
       
       if (!data.success) {
         throw new Error(data.message || 'Failed to fetch resumes');
@@ -59,6 +69,7 @@ const AdminResumes = () => {
       
       setResumes(data.data);
     } catch (err) {
+      console.error('Error fetching resumes:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch resumes');
     } finally {
       setLoading(false);

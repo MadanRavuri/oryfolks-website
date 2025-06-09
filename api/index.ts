@@ -160,25 +160,6 @@ app.post('/api/resume', upload.single('resumeFile'), async (req: Request, res: R
   }
 });
 
-// Serve uploaded files
-app.get('/uploads/:filename', (req: Request, res: Response) => {
-  const filename = req.params.filename;
-  const filePath = path.join(uploadsDir, filename);
-  
-  // Check if file exists
-  if (!fs.existsSync(filePath)) {
-    return res.status(404).json({ message: 'File not found' });
-  }
-
-  // Set appropriate headers
-  res.setHeader('Content-Type', 'application/pdf');
-  res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
-  
-  // Stream the file
-  const fileStream = fs.createReadStream(filePath);
-  fileStream.pipe(res);
-});
-
 app.get('/api/resume', async (_req: Request, res: Response) => {
   console.log('GET /api/resume route hit.');
   try {
@@ -253,30 +234,44 @@ app.get('/api/contact', async (_req: Request, res: Response) => {
 });
 
 // Error handling middleware
-app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-  console.error('Error in middleware:', err);
+app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+  console.error('Error:', err);
   
-  // Set content type header explicitly
-  res.setHeader('Content-Type', 'application/json');
-  
-  // Ensure we always return JSON responses
-  if (err.message.includes('Invalid file type')) {
-    return res.status(400).json({ 
+  // Handle multer errors
+  if (err instanceof multer.MulterError) {
+    if (err.code === 'LIMIT_FILE_SIZE') {
+      return res.status(400).json({
+        success: false,
+        error: 'File size too large. Maximum size is 5MB.'
+      });
+    }
+    return res.status(400).json({
       success: false,
-      message: err.message 
-    });
-  } else if (err.name === 'SyntaxError') {
-    return res.status(400).json({ 
-      success: false,
-      message: 'Invalid request format' 
-    });
-  } else {
-    return res.status(500).json({ 
-      success: false,
-      message: 'Internal server error',
-      error: err.message 
+      error: err.message
     });
   }
+
+  // Handle validation errors
+  if (err.name === 'ValidationError') {
+    return res.status(400).json({
+      success: false,
+      error: err.message
+    });
+  }
+
+  // Handle syntax errors
+  if (err instanceof SyntaxError) {
+    return res.status(400).json({
+      success: false,
+      error: 'Invalid JSON'
+    });
+  }
+
+  // Handle other errors
+  res.status(500).json({
+    success: false,
+    error: 'Internal server error'
+  });
 });
 
 // Health check endpoint

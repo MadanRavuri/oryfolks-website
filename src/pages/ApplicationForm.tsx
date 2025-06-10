@@ -24,7 +24,6 @@ const ApplicationForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -39,111 +38,63 @@ const ApplicationForm = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
-
-    if (!formData.resumeFile) {
-      setError('Please upload your resume');
-      return;
-    }
-
-    const formDataToSend = new FormData();
-    formDataToSend.append('name', formData.name);
-    formDataToSend.append('email', formData.email);
-    formDataToSend.append('phone', formData.phone);
-    formDataToSend.append('position', formData.position);
-    formDataToSend.append('experience', formData.experience);
-    formDataToSend.append('education', formData.education);
-    formDataToSend.append('skills', formData.skills);
-    formDataToSend.append('resumeFile', formData.resumeFile);
+    setIsSubmitting(true);
+    setError(null);
 
     try {
-      console.log('Submitting form to:', `${config.apiUrl}/resume`);
-      console.log('Form data:', Object.fromEntries(formDataToSend.entries()));
+      if (!formData.resumeFile) {
+        throw new Error('Please upload your resume');
+      }
+
+      const formDataToSend = new FormData();
+      Object.entries(formData).forEach(([key, value]) => {
+        if (value !== null) {
+          formDataToSend.append(key, value);
+        }
+      });
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout for file upload
 
       const response = await fetch(`${config.apiUrl}/resume`, {
         method: 'POST',
         body: formDataToSend,
+        signal: controller.signal
       });
 
-      console.log('Response status:', response.status);
-      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+      clearTimeout(timeoutId);
 
-      const responseText = await response.text();
-      console.log('Raw response:', responseText);
+      const data = await response.json();
 
-      let data;
-      try {
-        data = JSON.parse(responseText);
-      } catch (e) {
-        console.error('Failed to parse response as JSON:', e);
-        throw new Error(`Server returned invalid response format: ${responseText}`);
-      }
-
-      if (!data.success) {
+      if (!response.ok) {
         throw new Error(data.message || 'Failed to submit application');
       }
 
-      setSuccess('Application submitted successfully!');
-      resetForm();
-    } catch (err: any) {
-      console.error('Error submitting form:', err);
-      setError(err.message || 'Failed to submit application. Please try again.');
-    }
-  };
+      setIsSubmitted(true);
+      setFormData({
+        name: '',
+        email: '',
+        phone: '',
+        position: '',
+        experience: '',
+        education: '',
+        skills: '',
+        resumeFile: null
+      });
 
-  const resetForm = () => {
-    setFormData({
-      name: '',
-      email: '',
-      phone: '',
-      position: '',
-      experience: '',
-      education: '',
-      skills: '',
-      resumeFile: null
-    });
-    setIsSubmitted(false);
-  };
-
-  const downloadResume = (base64Data: string, filename: string) => {
-    // Remove the data URL prefix if present
-    const base64Content = base64Data.split(',')[1] || base64Data;
-    
-    // Convert base64 to blob
-    const byteCharacters = atob(base64Content);
-    const byteArrays = [];
-    
-    for (let offset = 0; offset < byteCharacters.length; offset += 512) {
-      const slice = byteCharacters.slice(offset, offset + 512);
-      const byteNumbers = new Array(slice.length);
-      
-      for (let i = 0; i < slice.length; i++) {
-        byteNumbers[i] = slice.charCodeAt(i);
+      setTimeout(() => {
+        setIsSubmitted(false);
+        navigate('/careers');
+      }, 5000);
+    } catch (error: any) {
+      console.error('Error submitting application:', error);
+      if (error.name === 'AbortError') {
+        setError('Request timed out. Please try again.');
+      } else {
+        setError(error.message || 'Failed to submit application. Please try again.');
       }
-      
-      const byteArray = new Uint8Array(byteNumbers);
-      byteArrays.push(byteArray);
-    }
-    
-    const blob = new Blob(byteArrays, { type: 'application/pdf' });
-    const url = window.URL.createObjectURL(blob);
-    
-    // Create a temporary link and trigger download
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    
-    // Cleanup
-    document.body.removeChild(link);
-    window.URL.revokeObjectURL(url);
-  };
-
-  const handleDownloadResume = (resume: any) => {
-    if (resume.resumeFile) {
-      downloadResume(resume.resumeFile, `${resume.name}_resume.pdf`);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -174,13 +125,6 @@ const ApplicationForm = () => {
               <div className="bg-red-50 border border-red-200 text-red-800 rounded-md p-4 mb-6">
                 <p className="font-medium">Error</p>
                 <p>{error}</p>
-              </div>
-            )}
-            
-            {success && (
-              <div className="bg-green-50 border border-green-200 text-green-800 rounded-md p-4 mb-6">
-                <p className="font-medium">Success</p>
-                <p>{success}</p>
               </div>
             )}
             

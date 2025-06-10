@@ -4,8 +4,6 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import multer from 'multer';
 import path from 'path';
-import fs from 'fs';
-import os from 'os';
 import Resume from './models/Resume';
 import Contact from './models/Contact';
 
@@ -13,7 +11,6 @@ dotenv.config();
 console.log('Serverless function starting up...');
 
 const app = express();
-const port = process.env.PORT || 3001;
 
 // CORS configuration for production
 const allowedOrigins = [
@@ -98,21 +95,8 @@ app.post('/api/resume', upload.single('resumeFile'), async (req: Request, res: R
     console.log('Received file:', file);
 
     if (!file) {
-      return res.status(400).json({ 
-        success: false,
-        message: 'Resume file is required' 
-      });
-    }
-
-    // Validate required fields
-    const requiredFields = ['name', 'email', 'phone', 'position', 'experience', 'education', 'skills'];
-    const missingFields = requiredFields.filter(field => !req.body[field]);
-    
-    if (missingFields.length > 0) {
-      return res.status(400).json({
-        success: false,
-        message: `Missing required fields: ${missingFields.join(', ')}`
-      });
+      res.status(400).json({ message: 'Resume file is required' });
+      return;
     }
 
     // Store file in base64 format
@@ -126,37 +110,14 @@ app.post('/api/resume', upload.single('resumeFile'), async (req: Request, res: R
     };
 
     const resume = new Resume(resumeData);
-    const savedResume = await resume.save();
     
-    // Set content type header explicitly
-    res.setHeader('Content-Type', 'application/json');
-    return res.status(201).json({
-      success: true,
-      data: savedResume,
-      message: 'Resume submitted successfully'
-    });
+    const savedResume = await resume.save();
+    console.log('Saved resume:', savedResume);
+    res.status(201).json(savedResume);
 
   } catch (error: any) {
     console.error('Error saving resume:', error);
-    
-    // Set content type header explicitly
-    res.setHeader('Content-Type', 'application/json');
-    
-    // Handle validation errors
-    if (error.name === 'ValidationError') {
-      return res.status(400).json({
-        success: false,
-        message: 'Validation Error',
-        errors: Object.values(error.errors).map((err: any) => err.message)
-      });
-    }
-
-    // Handle other errors
-    return res.status(500).json({
-      success: false,
-      message: 'Error saving resume',
-      error: error.message
-    });
+    res.status(500).json({ message: 'Error saving resume' });
   }
 });
 
@@ -234,44 +195,15 @@ app.get('/api/contact', async (_req: Request, res: Response) => {
 });
 
 // Error handling middleware
-app.use((err: any, req: Request, res: Response, next: NextFunction) => {
-  console.error('Error:', err);
-  
-  // Handle multer errors
-  if (err instanceof multer.MulterError) {
-    if (err.code === 'LIMIT_FILE_SIZE') {
-      return res.status(400).json({
-        success: false,
-        error: 'File size too large. Maximum size is 5MB.'
-      });
-    }
-    return res.status(400).json({
-      success: false,
-      error: err.message
-    });
+app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+  console.error('Error in middleware:', err);
+  if (err.message.includes('Invalid file type')) {
+    res.status(400).json({ message: err.message });
+  } else if (err.name === 'SyntaxError') {
+    res.status(400).json({ message: 'Invalid request format' });
+  } else {
+    res.status(500).json({ message: 'Internal server error' });
   }
-
-  // Handle validation errors
-  if (err.name === 'ValidationError') {
-    return res.status(400).json({
-      success: false,
-      error: err.message
-    });
-  }
-
-  // Handle syntax errors
-  if (err instanceof SyntaxError) {
-    return res.status(400).json({
-      success: false,
-      error: 'Invalid JSON'
-    });
-  }
-
-  // Handle other errors
-  res.status(500).json({
-    success: false,
-    error: 'Internal server error'
-  });
 });
 
 // Health check endpoint
@@ -280,8 +212,10 @@ app.get('/api/health', (_req: Request, res: Response) => {
   res.status(200).json({ status: 'ok' });
 });
 
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+// Start server
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });
 
 export default app; 

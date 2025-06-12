@@ -6,6 +6,7 @@ import multer from 'multer';
 import path from 'path';
 import Resume from './models/Resume';
 import Contact from './models/Contact';
+import { PrismaClient } from '@prisma/client';
 
 dotenv.config();
 console.log('Serverless function starting up...');
@@ -191,6 +192,22 @@ app.get('/api/contact', async (_req: Request, res: Response) => {
   } catch (error: any) {
     console.error('Error fetching contacts:', error);
     res.status(500).json({ message: 'Error fetching contacts' });
+  }
+});
+
+// Endpoint to fetch resumes
+app.get('/api/resumes', async (req, res) => {
+  try {
+    const resumes = await Resume.find().sort({ createdAt: -1 });
+    const formattedResumes = resumes.map(resume => ({
+      id: resume._id,
+      name: resume.name,
+      data: resume.resumeFile // Include base64 data for download
+    }));
+    res.json(formattedResumes);
+  } catch (error) {
+    console.error('Error fetching resumes:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 

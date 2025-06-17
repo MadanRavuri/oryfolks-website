@@ -424,25 +424,23 @@ const HomePage = () => {
                 className="bg-white rounded-xl md:rounded-2xl p-4 md:p-6 border border-gray-100 hover:border-primary-200 hover:shadow-xl md:hover:shadow-2xl transition-all duration-300 flex flex-col h-full"
               >
                 <div className="flex flex-col items-center text-center flex-grow">
-                  <div className="h-20 md:h-24 flex items-center justify-center mb-6">
+                  <div className="mb-4 md:mb-6 h-20 md:h-24 flex items-center justify-center">
                     <img 
                       src={partner.logo} 
                       alt={`${partner.title} logo`}
-                      className={`max-h-full w-auto object-contain ${partner.title === "Shigoto" ? "scale-75" : ""}`}
+                      className="max-h-full w-auto object-contain"
                     />
                   </div>
-                  <div className="flex flex-col flex-grow">
-                    <h3 className="text-xl md:text-2xl font-semibold text-primary-800 mb-3">{partner.title}</h3>
-                    <p className="text-sm md:text-base text-gray-600 mb-6 flex-grow leading-relaxed">{partner.description}</p>
-                    <div className="w-full">
-                      <Button
-                        variant="outline"
-                        onClick={() => window.open(partner.link, '_blank')}
-                        className="w-full hover:scale-105 transition-transform duration-300 text-sm md:text-base px-4 md:px-6 py-2 md:py-3"
-                      >
-                        Learn More
-                      </Button>
-                    </div>
+                  <h3 className="text-xl md:text-2xl font-semibold text-primary-800 mb-2 md:mb-3">{partner.title}</h3>
+                  <p className="text-sm md:text-base text-gray-600 mb-4 md:mb-6 flex-grow leading-relaxed">{partner.description}</p>
+                  <div className="w-full mt-auto">
+                    <Button
+                      variant="outline"
+                      onClick={() => window.open(partner.link, '_blank')}
+                      className="w-full hover:scale-105 transition-transform duration-300 text-sm md:text-base px-4 md:px-6 py-2 md:py-3"
+                    >
+                      Learn More
+                    </Button>
                   </div>
                 </div>
               </motion.div>

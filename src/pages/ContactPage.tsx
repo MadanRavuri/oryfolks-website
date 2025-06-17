@@ -107,7 +107,7 @@ const ContactPage = () => {
                   <MapPin className="text-primary-600" size={24} />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-primary-800 mb-1">Our Location</h3>
+                  <h3 className="text-lg font-semibold text-primary-800 mb-1">India Office</h3>
                   <p className="text-gray-600">
                     Plot No. 25/11/23,<br />
                     Savithri Nagar 3rd street,<br />
@@ -119,11 +119,43 @@ const ContactPage = () => {
 
               <div className="flex items-start gap-4">
                 <div className="bg-primary-50 p-3 rounded-lg">
+                  <MapPin className="text-primary-600" size={24} />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-primary-800 mb-1">Singapore Office</h3>
+                  <p className="text-gray-600">
+                    #1792, MBFC Tower 3<br />
+                    12 Marina Blvd,<br />
+                    Singapore 018982
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-4">
+                <div className="bg-primary-50 p-3 rounded-lg">
+                  <MapPin className="text-primary-600" size={24} />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-primary-800 mb-1">Japan Office</h3>
+                  <p className="text-gray-600">
+                    Higashi Azabu K building 3F,<br />
+                    3-4-17 Higashi Azabu Minato-ku,<br />
+                    Tokyo, Japan 106-0044
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-4">
+                <div className="bg-primary-50 p-3 rounded-lg">
                   <Phone className="text-primary-600" size={24} />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-primary-800 mb-1">Phone</h3>
-                  <p className="text-gray-600">Main Office: +91 0861-4500024</p>
+                  <h3 className="text-lg font-semibold text-primary-800 mb-1">Phone Numbers</h3>
+                  <p className="text-gray-600">
+                    India: +91 0861-4500024<br />
+                    Singapore: +65-8425-1978<br />
+                    Japan: +81-3-6876-0591 / +81-50-1706-3337
+                  </p>
                 </div>
               </div>
 

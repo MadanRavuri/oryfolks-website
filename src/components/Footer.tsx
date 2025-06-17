@@ -5,9 +5,9 @@ const Footer = () => {
   return (
     <footer className="bg-gray-900 text-white">
       <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {/* Company Info with logo image */}
-          <div>
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
+          {/* Company Info with logo */}
+          <div className="md:col-span-3">
             <NavLink to="/" className="inline-flex items-center gap-2 mb-4">
               <div className="bg-white p-2 rounded-lg">
                 <img 
@@ -57,82 +57,90 @@ const Footer = () => {
           </div>
 
           {/* Quick Links */}
-          <div>
+          <div className="md:col-span-2">
             <h3 className="text-lg font-semibold mb-4 border-b border-gray-700 pb-2">Quick Links</h3>
-            <ul className="space-y-2">
-              <li>
-                <NavLink to="/" className="text-gray-300 hover:text-secondary-500 transition-colors">Home</NavLink>
-              </li>
-              <li>
-                <NavLink to="/about" className="text-gray-300 hover:text-secondary-500 transition-colors">About Us</NavLink>
-              </li>
-              <li>
-                <NavLink to="/services" className="text-gray-300 hover:text-secondary-500 transition-colors">Services</NavLink>
-              </li>
-              <li>
-                <NavLink to="/careers" className="text-gray-300 hover:text-secondary-500 transition-colors">Careers</NavLink>
-              </li>
-              <li>
-                <NavLink to="/blog" className="text-gray-300 hover:text-secondary-500 transition-colors">Blog</NavLink>
-              </li>
-              <li>
-                <NavLink to="/contact" className="text-gray-300 hover:text-secondary-500 transition-colors">Contact Us</NavLink>
-              </li>
-            </ul>
-          </div>
-
-          {/* Services */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4 border-b border-gray-700 pb-2">Our Services</h3>
-            <ul className="space-y-2">
-              <li>
-                <NavLink 
-                  to="/services/bot-vision" 
-                  className="text-gray-300 hover:text-secondary-500 transition-colors"
-                >
-                  BOT Vision
-                </NavLink>
-              </li>
-              <li>
-                <NavLink 
-                  to="/services/it-staffing" 
-                  className="text-gray-300 hover:text-secondary-500 transition-colors"
-                >
-                  IT Staffing
-                </NavLink>
-              </li>
-              <li>
-                <NavLink 
-                  to="/services/full-cycle" 
-                  className="text-gray-300 hover:text-secondary-500 transition-colors"
-                >
-                  Full Cycle Development
-                </NavLink>
-              </li>
-            </ul>
-          </div>
-
-          {/* Contact Info */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4 border-b border-gray-700 pb-2">Contact Us</h3>
             <ul className="space-y-3">
-              <li className="flex items-start gap-3">
-                <MapPin size={20} className="text-secondary-500 mt-1 flex-shrink-0" />
-                <span className="text-gray-300">Plot No. 25/11/23, Savithri Nagar 3rd street, Vedayapalem, Nellore 524004, Andhra Pradesh, India</span>
+              <li>
+                <NavLink to="/" className="text-gray-300 hover:text-secondary-500 transition-colors">
+                  Home
+                </NavLink>
               </li>
-              <li className="flex items-center gap-3">
-                <Phone size={20} className="text-secondary-500 flex-shrink-0" />
-                <a href="tel:+918614500024" className="text-gray-300 hover:text-secondary-500 transition-colors">
-                  +91 0861-4500024
-                </a>
+              <li>
+                <NavLink to="/about" className="text-gray-300 hover:text-secondary-500 transition-colors">
+                  About Us
+                </NavLink>
               </li>
-              <li className="flex items-center gap-3">
-                <Mail size={20} className="text-secondary-500 flex-shrink-0" />
-                <a href="mailto:info@oryfolks.com" className="text-gray-300 hover:text-secondary-500 transition-colors">
+              <li>
+                <NavLink to="/services" className="text-gray-300 hover:text-secondary-500 transition-colors">
+                  Services
+                </NavLink>
+              </li>
+              <li>
+                <NavLink to="/careers" className="text-gray-300 hover:text-secondary-500 transition-colors">
+                  Careers
+                </NavLink>
+              </li>
+              <li>
+                <NavLink to="/blog" className="text-gray-300 hover:text-secondary-500 transition-colors">
+                  Blog
+                </NavLink>
+              </li>
+              <li>
+                <NavLink to="/contact" className="text-gray-300 hover:text-secondary-500 transition-colors">
+                  Contact
+                </NavLink>
+              </li>
+            </ul>
+          </div>
+
+          {/* Global Offices */}
+          <div className="md:col-span-4">
+            <h3 className="text-lg font-semibold mb-4 border-b border-gray-700 pb-2">Global Offices</h3>
+            <div className="space-y-4">
+              <div>
+                <h4 className="text-secondary-500 font-medium mb-3 text-base">India Office</h4>
+                <p className="text-gray-300 text-base leading-relaxed">
+                  Plot No. 25/11/23, Savithri Nagar 3rd street, Vedayapalem, Nellore 524004, Andhra Pradesh, India
+                </p>
+              </div>
+              <div>
+                <h4 className="text-secondary-500 font-medium mb-3 text-base">Singapore Office</h4>
+                <p className="text-gray-300 text-base leading-relaxed">
+                  #1792, MBFC Tower 3, 12 Marina Blvd, Singapore 018982
+                </p>
+              </div>
+          <div>
+                <h4 className="text-secondary-500 font-medium mb-3 text-base">Japan Office</h4>
+                <p className="text-gray-300 text-base leading-relaxed">
+                  Higashi Azabu K building 3F, 3-4-17 Higashi Azabu Minato-ku, Tokyo, Japan 106-0044
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Contact Information */}
+          <div className="md:col-span-3">
+            <h3 className="text-lg font-semibold mb-4 border-b border-gray-700 pb-2">Contact Us</h3>
+            <div className="space-y-6">
+              <div>
+                <h4 className="text-secondary-500 font-medium mb-3 text-base">Phone Numbers</h4>
+                <ul className="space-y-2 text-base">
+                  <li className="text-gray-300">India: +91 0861-4500024</li>
+                  <li className="text-gray-300">Singapore: +65-8425-1978</li>
+                  <li className="text-gray-300">Japan: +81-3-6876-0591 /</li>
+                  <li className="text-gray-300 pl-12">+81-50-1706-3337</li>
+                </ul>
+              </div>
+              <div>
+                <h4 className="text-secondary-500 font-medium mb-3 text-base">Email</h4>
+                <a 
+                  href="mailto:info@oryfolks.com" 
+                  className="text-gray-300 hover:text-secondary-500 transition-colors text-base"
+                >
                   info@oryfolks.com
                 </a>
-              </li>
-            </ul>
+              </div>
+            </div>
           </div>
         </div>
 

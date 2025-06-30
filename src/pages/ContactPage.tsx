@@ -101,73 +101,90 @@ const ContactPage = () => {
               Have questions about our services or want to discuss your project? We're here to help. Reach out to us through any of the following channels.
             </p>
 
-            <div className="space-y-6">
-              <div className="flex items-start gap-4">
-                <div className="bg-primary-50 p-3 rounded-lg">
-                  <MapPin className="text-primary-600" size={24} />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              {/* India Office */}
+              <motion.div
+                whileHover={{ scale: 1.03, boxShadow: '0 8px 32px rgba(80, 80, 180, 0.10)' }}
+                className="bg-white rounded-2xl shadow-md border border-gray-100 p-6 flex flex-col gap-3 transition-all duration-200 hover:shadow-xl"
+              >
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary-50">
+                    <MapPin className="text-primary-600" size={28} />
+                  </span>
+                  <span className="bg-primary-100 text-primary-700 text-xs font-semibold px-3 py-1 rounded-full">India</span>
                 </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-primary-800 mb-1">India Office</h3>
-                  <p className="text-gray-600">
-                    Plot No. 25/11/23,<br />
-                    Savithri Nagar 3rd street,<br />
-                    Vedayapalem, Nellore 524004,<br />
-                    Andhra Pradesh, India
-                  </p>
-                </div>
-              </div>
+                <h3 className="text-lg font-bold text-primary-800 mb-1">India Office</h3>
+                <p className="text-gray-600 text-sm leading-relaxed">
+                  Plot No. 25/11/23,<br />
+                  Savithri Nagar 3rd street,<br />
+                  Vedayapalem, Nellore 524004,<br />
+                  Andhra Pradesh, India
+                </p>
+                <a href="tel:+918614500024" className="flex items-center gap-2 mt-2 text-primary-600 hover:underline text-sm">
+                  <Phone size={18} /> +91 0861-4500024
+                </a>
+              </motion.div>
 
-              <div className="flex items-start gap-4">
-                <div className="bg-primary-50 p-3 rounded-lg">
-                  <MapPin className="text-primary-600" size={24} />
+              {/* Singapore Office */}
+              <motion.div
+                whileHover={{ scale: 1.03, boxShadow: '0 8px 32px rgba(80, 80, 180, 0.10)' }}
+                className="bg-white rounded-2xl shadow-md border border-gray-100 p-6 flex flex-col gap-3 transition-all duration-200 hover:shadow-xl"
+              >
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary-50">
+                    <MapPin className="text-primary-600" size={28} />
+                  </span>
+                  <span className="bg-primary-100 text-primary-700 text-xs font-semibold px-3 py-1 rounded-full">Singapore</span>
                 </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-primary-800 mb-1">Singapore Office</h3>
-                  <p className="text-gray-600">
-                    #1792, MBFC Tower 3<br />
-                    12 Marina Blvd,<br />
-                    Singapore 018982
-                  </p>
-                </div>
-              </div>
+                <h3 className="text-lg font-bold text-primary-800 mb-1">Singapore Office</h3>
+                <p className="text-gray-600 text-sm leading-relaxed">
+                  #1792, MBFC Tower 3<br />
+                  12 Marina Blvd,<br />
+                  Singapore 018982
+                </p>
+                <a href="tel:+6581198492" className="flex items-center gap-2 mt-2 text-primary-600 hover:underline text-sm">
+                  <Phone size={18} /> +65 81198492
+                </a>
+              </motion.div>
 
-              <div className="flex items-start gap-4">
-                <div className="bg-primary-50 p-3 rounded-lg">
-                  <MapPin className="text-primary-600" size={24} />
+              {/* Japan Office */}
+              <motion.div
+                whileHover={{ scale: 1.03, boxShadow: '0 8px 32px rgba(80, 80, 180, 0.10)' }}
+                className="bg-white rounded-2xl shadow-md border border-gray-100 p-6 flex flex-col gap-3 transition-all duration-200 hover:shadow-xl"
+              >
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary-50">
+                    <MapPin className="text-primary-600" size={28} />
+                  </span>
+                  <span className="bg-primary-100 text-primary-700 text-xs font-semibold px-3 py-1 rounded-full">Japan</span>
                 </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-primary-800 mb-1">Japan Office</h3>
-                  <p className="text-gray-600">
-                    Higashi Azabu K building 3F,<br />
-                    3-4-17 Higashi Azabu Minato-ku,<br />
-                    Tokyo, Japan 106-0044
-                  </p>
-                </div>
-              </div>
+                <h3 className="text-lg font-bold text-primary-800 mb-1">Japan Office</h3>
+                <p className="text-gray-600 text-sm leading-relaxed">
+                  Higashi Azabu K building 3F,<br />
+                  3-4-17 Higashi Azabu Minato-ku,<br />
+                  Tokyo, Japan 106-0044
+                </p>
+                <a href="tel:+815017063337" className="flex items-center gap-2 mt-2 text-primary-600 hover:underline text-sm">
+                  <Phone size={18} /> +81-50-1706-3337
+                </a>
+              </motion.div>
 
-              <div className="flex items-start gap-4">
-                <div className="bg-primary-50 p-3 rounded-lg">
-                  <Phone className="text-primary-600" size={24} />
+              {/* Email */}
+              <motion.div
+                whileHover={{ scale: 1.03, boxShadow: '0 8px 32px rgba(80, 80, 180, 0.10)' }}
+                className="bg-white rounded-2xl shadow-md border border-gray-100 p-6 flex flex-col gap-3 transition-all duration-200 hover:shadow-xl"
+              >
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary-50">
+                    <Mail className="text-primary-600" size={28} />
+                  </span>
+                  <span className="bg-primary-100 text-primary-700 text-xs font-semibold px-3 py-1 rounded-full">Email</span>
                 </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-primary-800 mb-1">Phone Numbers</h3>
-                  <p className="text-gray-600">
-                    India: +91 0861-4500024<br />
-                    Singapore: +65-8425-1978<br />
-                    Japan: +81-3-6876-0591 / +81-50-1706-3337
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-4">
-                <div className="bg-primary-50 p-3 rounded-lg">
-                  <Mail className="text-primary-600" size={24} />
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-primary-800 mb-1">Email</h3>
-                  <p className="text-gray-600">General Inquiries: info@oryfolks.com</p>
-                </div>
-              </div>
+                <h3 className="text-lg font-bold text-primary-800 mb-1">General Inquiries</h3>
+                <a href="mailto:info@oryfolks.com" className="text-primary-600 hover:underline text-sm flex items-center gap-2">
+                  <MessageSquare size={18} /> info@oryfolks.com
+                </a>
+              </motion.div>
             </div>
           </motion.div>
 

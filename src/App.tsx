@@ -11,10 +11,12 @@ import BotVisionPage from './pages/services/BotVisionPage';
 import ITStaffingPage from './pages/services/ITStaffingPage';
 import FullCyclePage from './pages/services/FullCyclePage';
 import AdminPage from './pages/AdminPage.tsx';
+import ErrorBoundary from './components/ErrorBoundary';
 import './i18n'; // Import i18n configuration
 
 function App() {
   return (
+    <ErrorBoundary>
     <Routes>
       <Route path="/" element={<Layout />}>
         <Route index element={<HomePage />} />
@@ -30,6 +32,7 @@ function App() {
         <Route path="admin" element={<AdminPage />} />
       </Route>
     </Routes>
+    </ErrorBoundary>
   );
 }
 

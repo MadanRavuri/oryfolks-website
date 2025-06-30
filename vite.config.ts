@@ -16,9 +16,23 @@ export default defineConfig({
       output: {
         manualChunks: undefined
       }
+    },
+    // Optimize for better loading in Japan
+    target: 'es2015',
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true
+      }
     }
   },
   server: {
+    port: 5173,
+    host: true
+  },
+  // Add headers for better caching and performance
+  preview: {
     port: 5173,
     host: true
   }

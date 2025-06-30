@@ -7,9 +7,18 @@ import path from 'path';
 import Resume from './models/Resume';
 import Contact from './models/Contact';
 import { PrismaClient } from '@prisma/client';
+import sgMail from '@sendgrid/mail';
 
 dotenv.config();
 console.log('Serverless function starting up...');
+
+// Configure SendGrid
+if (!process.env.SENDGRID_API_KEY) {
+  console.error('SENDGRID_API_KEY is not set in environment variables');
+} else {
+  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+  console.log('SendGrid API key configured');
+}
 
 const app = express();
 
@@ -24,7 +33,18 @@ const allowedOrigins = [
   'http://localhost:3000', // additional local development port
   'http://127.0.0.1:5173', // additional local development URL
   'http://127.0.0.1:3000',  // additional local development URL
-  'https://oryfolks-website-n2aw.vercel.app'
+  'https://oryfolks-website-n2aw.vercel.app',
+  // Add Japanese domains and common patterns
+  'https://*.vercel.app',
+  'https://*.netlify.app',
+  'https://*.herokuapp.com',
+  'https://*.railway.app',
+  'https://*.render.com',
+  // Allow any subdomain of oryfolks.com
+  'https://*.oryfolks.com',
+  // Development and testing domains
+  'https://*.ngrok.io',
+  'https://*.ngrok-free.app'
 ];
 
 // CORS middleware configuration
@@ -33,14 +53,31 @@ app.use(cors({
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
     
-    if (allowedOrigins.indexOf(origin) === -1) {
-      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
-      return callback(new Error(msg), false);
+    // Check exact matches first
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      return callback(null, true);
     }
+    
+    // Check wildcard patterns
+    const isAllowed = allowedOrigins.some(allowedOrigin => {
+      if (allowedOrigin.includes('*')) {
+        const pattern = allowedOrigin.replace('*', '.*');
+        const regex = new RegExp(pattern);
+        return regex.test(origin);
+      }
+      return false;
+    });
+    
+    if (isAllowed) {
     return callback(null, true);
+    }
+    
+    console.log(`CORS blocked origin: ${origin}`);
+    const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+    return callback(new Error(msg), false);
   },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
   credentials: true,
   preflightContinue: false,
   optionsSuccessStatus: 204
@@ -111,9 +148,40 @@ app.post('/api/resume', upload.single('resumeFile'), async (req: Request, res: R
     };
 
     const resume = new Resume(resumeData);
-    
     const savedResume = await resume.save();
     console.log('Saved resume:', savedResume);
+
+    // Send email to HR with attachment
+    try {
+      await sgMail.send({
+        to: 'hr@oryfolks.com',
+        from: 'ravurimadan@gmail.com',
+        replyTo: req.body.email,
+        subject: `New Resume Submission from ${req.body.name}`,
+        text: `Name: ${req.body.name}\nEmail: ${req.body.email}\nPhone: ${req.body.phone}\nPosition: ${req.body.position}\nExperience: ${req.body.experience}\nEducation: ${req.body.education}\nSkills: ${req.body.skills}`,
+        html: `<h2>New Resume Submission</h2>
+          <p><strong>Name:</strong> ${req.body.name}</p>
+          <p><strong>Email:</strong> ${req.body.email}</p>
+          <p><strong>Phone:</strong> ${req.body.phone}</p>
+          <p><strong>Position:</strong> ${req.body.position}</p>
+          <p><strong>Experience:</strong> ${req.body.experience}</p>
+          <p><strong>Education:</strong> ${req.body.education}</p>
+          <p><strong>Skills:</strong> ${req.body.skills}</p>`,
+        attachments: [
+          {
+            content: fileBase64,
+            filename: file.originalname,
+            type: file.mimetype,
+            disposition: 'attachment'
+          }
+        ]
+      });
+      console.log('Resume email sent successfully');
+    } catch (emailError: any) {
+      console.error('Error sending resume email:', emailError);
+      // Continue with the response even if email fails
+    }
+
     res.status(201).json(savedResume);
 
   } catch (error: any) {
@@ -154,6 +222,27 @@ app.post('/api/contact', async (req: Request, res: Response) => {
     
     const savedContact = await contact.save();
     console.log('Successfully saved contact:', savedContact);
+
+    // Send email to HR
+    try {
+      await sgMail.send({
+        to: 'hr@oryfolks.com',
+        from: 'ravurimadan@gmail.com',
+        replyTo: req.body.email,
+        subject: `New Contact Form Submission from ${req.body.name}`,
+        text: `Name: ${req.body.name}\nEmail: ${req.body.email}\nPhone: ${req.body.phone}\nSubject: ${req.body.subject}\nMessage: ${req.body.message}`,
+        html: `<h2>New Contact Form Submission</h2>
+          <p><strong>Name:</strong> ${req.body.name}</p>
+          <p><strong>Email:</strong> ${req.body.email}</p>
+          <p><strong>Phone:</strong> ${req.body.phone}</p>
+          <p><strong>Subject:</strong> ${req.body.subject}</p>
+          <p><strong>Message:</strong> ${req.body.message}</p>`
+      });
+      console.log('Contact form email sent successfully');
+    } catch (emailError: any) {
+      console.error('Error sending contact form email:', emailError);
+      // Continue with the response even if email fails
+    }
     
     res.status(201).json({
       success: true,

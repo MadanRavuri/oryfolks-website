@@ -17,14 +17,16 @@ const VideoSection = () => {
           Watch our story and see how we empower communities through innovation.
         </p>
         <div className="aspect-w-16 aspect-h-9 rounded-xl overflow-hidden shadow-lg mx-auto max-w-4xl">
-          <iframe
-            src="https://www.youtube.com/embed/dQw4w9WgXcQ"
-            title="OryFolks Video"
-            frameBorder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-            className="w-full h-full"
-          />
+          <video
+            controls
+            className="w-full h-full object-cover"
+            preload="metadata"
+            poster="/logo.jpg"
+          >
+            <source src="/Ory.Video.mp4" type="video/mp4" />
+            <source src="/MicrosoftTeams-video.mp4" type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
         </div>
       </motion.div>
     </section>

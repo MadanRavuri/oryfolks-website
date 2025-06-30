@@ -126,9 +126,8 @@ const Footer = () => {
                 <h4 className="text-secondary-500 font-medium mb-3 text-base">Phone Numbers</h4>
                 <ul className="space-y-2 text-base">
                   <li className="text-gray-300">India: +91 0861-4500024</li>
-                  <li className="text-gray-300">Singapore: +65-8425-1978</li>
-                  <li className="text-gray-300">Japan: +81-3-6876-0591 /</li>
-                  <li className="text-gray-300 pl-12">+81-50-1706-3337</li>
+                  <li className="text-gray-300">Singapore: +65 81198492</li>
+                  <li className="text-gray-300">Japan: +81-50-1706-3337</li>
                 </ul>
               </div>
               <div>

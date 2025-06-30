@@ -33,18 +33,7 @@ const allowedOrigins = [
   'http://localhost:3000', // additional local development port
   'http://127.0.0.1:5173', // additional local development URL
   'http://127.0.0.1:3000',  // additional local development URL
-  'https://oryfolks-website-n2aw.vercel.app',
-  // Add Japanese domains and common patterns
-  'https://*.vercel.app',
-  'https://*.netlify.app',
-  'https://*.herokuapp.com',
-  'https://*.railway.app',
-  'https://*.render.com',
-  // Allow any subdomain of oryfolks.com
-  'https://*.oryfolks.com',
-  // Development and testing domains
-  'https://*.ngrok.io',
-  'https://*.ngrok-free.app'
+  'https://oryfolks-website-n2aw.vercel.app'
 ];
 
 // CORS middleware configuration
@@ -53,31 +42,14 @@ app.use(cors({
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
     
-    // Check exact matches first
-    if (allowedOrigins.indexOf(origin) !== -1) {
-      return callback(null, true);
+    if (allowedOrigins.indexOf(origin) === -1) {
+      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+      return callback(new Error(msg), false);
     }
-    
-    // Check wildcard patterns
-    const isAllowed = allowedOrigins.some(allowedOrigin => {
-      if (allowedOrigin.includes('*')) {
-        const pattern = allowedOrigin.replace('*', '.*');
-        const regex = new RegExp(pattern);
-        return regex.test(origin);
-      }
-      return false;
-    });
-    
-    if (isAllowed) {
     return callback(null, true);
-    }
-    
-    console.log(`CORS blocked origin: ${origin}`);
-    const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
-    return callback(new Error(msg), false);
   },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
   preflightContinue: false,
   optionsSuccessStatus: 204

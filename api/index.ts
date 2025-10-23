@@ -22,8 +22,8 @@ if (!process.env.SENDGRID_API_KEY) {
 
 const app = express();
 
-// CORS configuration for production
-const allowedOrigins = [
+// CORS configuration: allow specifying ALLOWED_ORIGINS as a comma-separated env var
+const defaultAllowedOrigins = [
   'https://oryfolks-website.vercel.app',
   'https://oryfolks.com',
   'https://www.oryfolks.com',
@@ -35,6 +35,11 @@ const allowedOrigins = [
   'http://127.0.0.1:3000',  // additional local development URL
   'https://oryfolks-website-n2aw.vercel.app'
 ];
+
+const allowedOriginsEnv = process.env.ALLOWED_ORIGINS;
+const allowedOrigins = allowedOriginsEnv
+  ? allowedOriginsEnv.split(',').map(s => s.trim()).filter(Boolean)
+  : defaultAllowedOrigins;
 
 // CORS middleware configuration
 app.use(cors({

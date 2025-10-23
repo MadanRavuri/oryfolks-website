@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import config from '../config';
 
 interface Resume {
   _id: string;
@@ -46,7 +47,7 @@ const AdminPage = () => {
 
   const fetchResumes = async () => {
     try {
-      const response = await fetch('https://oryfolks-website.vercel.app/api/resume');
+      const response = await fetch(`${config.apiUrl}/resume`);
       if (!response.ok) throw new Error('Failed to fetch resumes');
       const data = await response.json();
       setResumes(data);
@@ -58,7 +59,7 @@ const AdminPage = () => {
 
   const fetchContacts = async () => {
     try {
-      const response = await fetch('https://oryfolks-website.vercel.app/api/contact');
+      const response = await fetch(`${config.apiUrl}/contact`);
       if (!response.ok) throw new Error('Failed to fetch contacts');
       const data = await response.json();
       setContacts(data);

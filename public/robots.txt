@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://oryfolks.com/sitemap.xml
+Host: https://oryfolks.com

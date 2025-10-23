@@ -1,8 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { Menu, X, ChevronDown } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
-import LanguageSelector from './LanguageSelector';
+import LanguageSelector from './LanguageSelector.tsx';
 
 type HeaderProps = {
   scrolled: boolean;
@@ -12,8 +11,6 @@ const Header = ({ scrolled }: HeaderProps) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [servicesDropdownOpen, setServicesDropdownOpen] = useState(false);
   const location = useLocation();
-  const { t } = useTranslation();
-  const dropdownCloseTimeout = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     setMobileMenuOpen(false);
@@ -53,14 +50,6 @@ const Header = ({ scrolled }: HeaderProps) => {
     { name: 'Contact Us', path: '/contact' },
   ];
 
-  const toggleMenu = () => {
-    setMobileMenuOpen(!mobileMenuOpen);
-  };
-
-  const closeMenu = () => {
-    setMobileMenuOpen(false);
-  };
-
   return (
     <header
       className={`fixed w-full z-50 bg-white transition-all duration-300 py-2 ${
@@ -69,7 +58,7 @@ const Header = ({ scrolled }: HeaderProps) => {
     >
       <div className="container mx-auto px-4 flex items-center justify-between">
         {/* Logo */}
-        <NavLink to="/" className="flex items-center gap-2" onClick={closeMenu}>
+        <NavLink to="/" className="flex items-center gap-2">
           <div className="flex items-center">
             <img 
               src="/logo.jpg" 
@@ -84,22 +73,7 @@ const Header = ({ scrolled }: HeaderProps) => {
           {navLinks.map((link) => (
             <div key={link.path} className="relative">
               {link.dropdown ? (
-                <div
-                  className="relative"
-                  onMouseEnter={() => {
-                    if (dropdownCloseTimeout.current) {
-                      clearTimeout(dropdownCloseTimeout.current);
-                      dropdownCloseTimeout.current = null;
-                    }
-                    setServicesDropdownOpen(true);
-                  }}
-                  onMouseLeave={() => {
-                    dropdownCloseTimeout.current = setTimeout(() => {
-                      setServicesDropdownOpen(false);
-                    }, 180);
-                  }}
-                  style={{ display: 'inline-block' }}
-                >
+                <div className="relative">
                   <NavLink
                     to={link.path}
                     className={({ isActive }) =>
@@ -109,13 +83,21 @@ const Header = ({ scrolled }: HeaderProps) => {
                     }
                   >
                     {link.name}
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setServicesDropdownOpen(!servicesDropdownOpen);
+                      }}
+                      className="focus:outline-none"
+                    >
                       <ChevronDown 
                         size={16} 
                         className={`transition-transform ${servicesDropdownOpen ? 'rotate-180' : ''}`}
                       />
+                    </button>
                   </NavLink>
                   {servicesDropdownOpen && (
-                    <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50">
+                    <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2">
                       {link.dropdown.map((item) => (
                         <NavLink
                           key={item.path}
@@ -152,16 +134,13 @@ const Header = ({ scrolled }: HeaderProps) => {
           </div>
 
           {/* Mobile Menu Button */}
-          <div className="md:hidden flex items-center gap-4">
-            <LanguageSelector />
           <button
-              onClick={toggleMenu}
-              className="text-gray-700 hover:text-primary-600 transition-colors"
-              aria-label="Toggle menu"
+            aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="lg:hidden text-black text-2xl focus:outline-none"
           >
             {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
-          </div>
         </div>
       </div>
 
@@ -170,7 +149,7 @@ const Header = ({ scrolled }: HeaderProps) => {
         <>
           <div
             className="fixed inset-0 bg-black opacity-30 z-40"
-            onClick={closeMenu}
+            onClick={() => setMobileMenuOpen(false)}
           />
           <div className="lg:hidden fixed top-0 right-0 h-full w-3/4 max-w-xs bg-white z-50 pt-20 shadow-lg">
             <nav className="flex flex-col p-6">

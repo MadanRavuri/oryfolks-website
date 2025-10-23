@@ -84,7 +84,7 @@ oryfolks-website/
 │   ├── pages/            # Page components
 │   ├── i18n/             # Internationalization
 │   └── assets/           # Static assets
-├── backend/              # Backend source code
+├── api/              # Backend source code
 │   ├── src/             # Server code
 │   ├── models/          # Database models
 │   └── uploads/         # File upload directory

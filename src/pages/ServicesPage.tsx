@@ -1,8 +1,6 @@
-import { ChevronRight, Building, BarChart3, Globe, Users, Lightbulb, Calendar, BookOpen, MessageCircle, Code, Briefcase, Users2, Check } from 'lucide-react';
+import { ChevronRight, Code, Briefcase, Users2, Check } from 'lucide-react';
 import { motion } from 'framer-motion';
-import Hero from '../components/Hero';
 import Section from '../components/Section';
-import Card, { CardContent } from '../components/Card';
 import Button from '../components/Button';
 import { Link } from 'react-router-dom';
 
@@ -64,12 +62,45 @@ const ServicesPage = () => {
 
   return (
     <>
-      <Hero
-        title="Our Services"
-        subtitle="Comprehensive engineering solutions designed to drive innovation, excellence, and sustainable impact."
-        image="https://images.pexels.com/photos/3184338/pexels-photo-3184338.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
-        size="md"
-      />
+   {/* ===== HERO (LCP OPTIMIZED) ===== */}
+<div className="relative min-h-[70vh] flex items-center justify-center overflow-hidden">
+  {/* LCP IMAGE - OPTIMIZED */}
+  <link
+    rel="preload"
+    as="image"
+    href="/services-hero.webp"
+    type="image/webp"
+  />
+  <img
+    src="/services-hero.webp"
+    alt="Our Services at OryFolks"
+    className="absolute inset-0 w-full h-full object-cover"
+    width={1400}
+    height={900}
+    loading="eager"
+    {...({ fetchpriority: 'high' } as any)}
+    decoding="async"
+    style={{
+      contentVisibility: 'auto',
+      containIntrinsicSize: '1400px 900px'
+    }}
+  />
+
+  {/* Overlay */}
+  <div className="absolute inset-0 bg-primary-900/70" />
+
+  {/* Content */}
+  <div className="relative z-10 text-center px-6 max-w-4xl">
+    <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6">
+      Our Services
+    </h1>
+    <p className="text-xl text-gray-200 mb-8">
+      Comprehensive engineering solutions designed to drive innovation,
+      excellence, and sustainable impact.
+    </p>
+  </div>
+</div>
+
 
       {/* Services Overview */}
       <Section background="white">
@@ -81,7 +112,7 @@ const ServicesPage = () => {
         </div>
 
         <div className="space-y-16">
-          {serviceCategories.map((category, categoryIndex) => (
+          {serviceCategories.map((category) => (
             <div key={category.id} id={category.id} className="scroll-mt-24">
               <motion.div
                 initial={{ opacity: 0 }}

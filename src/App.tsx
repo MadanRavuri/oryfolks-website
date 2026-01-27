@@ -10,7 +10,6 @@ import ApplicationForm from './pages/ApplicationForm';
 import BotVisionPage from './pages/services/BotVisionPage';
 import ITStaffingPage from './pages/services/ITStaffingPage';
 import FullCyclePage from './pages/services/FullCyclePage';
-import AdminPage from './pages/AdminPage.tsx';
 import './i18n'; // Import i18n configuration
 
 function App() {
@@ -27,7 +26,7 @@ function App() {
         <Route path="blog" element={<BlogPage />} />
         <Route path="contact" element={<ContactPage />} />
         <Route path="apply" element={<ApplicationForm />} />
-        <Route path="admin" element={<AdminPage />} />
+        
       </Route>
     </Routes>
   );

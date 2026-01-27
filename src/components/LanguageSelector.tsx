@@ -10,6 +10,8 @@ const LanguageSelector = () => {
 
   return (
     <select
+      id="language-selector"
+      name="language-selector"
       value={currentLang}
       onChange={(e) => changeLanguage(e.target.value)}
       className="border rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"

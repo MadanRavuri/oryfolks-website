@@ -2,51 +2,61 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-  <!-- Favicons and site icons (fallbacks included) -->
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-  <link rel="icon" type="image/png" sizes="32x32" href="/oryfolkslogo1.png" />
-  <link rel="icon" type="image/png" sizes="16x16" href="/oryfolkslogo1.png" />
-  <link rel="apple-touch-icon" href="/oryfolkslogo1.png" />
-  <link rel="shortcut icon" href="/oryfolkslogo1.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <meta name="theme-color" content="#4071bf" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <title>OryFolks</title>
-  <!-- Open Graph / Facebook -->
-  <meta property="og:title" content="OryFolks" />
-  <meta property="og:description" content="OryFolks - A premier organization dedicated to community development and innovative solutions." />
-  <meta property="og:image" content="/oryfolkslogo1.png" />
-  <meta property="og:image:alt" content="OryFolks logo" />
-  <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://oryfolks.com" />
 
-  <!-- Twitter -->
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="OryFolks" />
-  <meta name="twitter:description" content="OryFolks - A premier organization dedicated to community development and innovative solutions." />
-  <meta name="twitter:image" content="/oryfolkslogo1.png" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <meta name="description" content="OryFolks - A premier organization dedicated to community development and innovative solutions.">
-    <!-- JSON-LD Organization schema to help search engines pick up logo and organization info -->
+    <!-- Favicons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/oryfolkslogo1.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/oryfolkslogo1.png" />
+
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <meta name="theme-color" content="#4071bf" />
+    <meta name="mobile-web-app-capable" content="yes" />
+
+    <title>OryFolks</title>
+    <meta
+      name="description"
+      content="OryFolks - A premier organization dedicated to community development and innovative solutions."
+    />
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="OryFolks" />
+    <meta property="og:description" content="OryFolks - A premier organization dedicated to community development and innovative solutions." />
+    <meta property="og:image" content="/oryfolkslogo1.png" />
+    <meta property="og:image:alt" content="OryFolks logo" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://oryfolks.com" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="OryFolks" />
+    <meta name="twitter:description" content="OryFolks - A premier organization dedicated to community development and innovative solutions." />
+    <meta name="twitter:image" content="/oryfolkslogo1.png" />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- DNS Prefetch -->
+    <link rel="dns-prefetch" href="//images.pexels.com" />
+
+    <!-- Structured Data -->
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
         "@type": "Organization",
         "name": "OryFolks",
         "url": "https://oryfolks.com",
-        "logo": "https://oryfolks.com/oryfolkslogo1.png",
-        "sameAs": [
-          "https://www.facebook.com/oryfolks",
-          "https://twitter.com/oryfolks",
-          "https://www.instagram.com/oryfolks",
-          "https://www.linkedin.com/company/oryfolks"
-        ]
+        "logo": "https://oryfolks.com/oryfolkslogo1.png"
       }
     </script>
   </head>
+
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>

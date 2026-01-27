@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { Mail, Phone, MapPin, MessageSquare, Send } from 'lucide-react';
+import { Mail, Phone, MapPin, Send } from 'lucide-react';
 import { motion } from 'framer-motion';
-import Hero from '../components/Hero';
 import Section from '../components/Section';
 import Button from '../components/Button';
 import config from '../config';
+
 
 const ContactPage = () => {
   const [formData, setFormData] = useState({
@@ -30,8 +30,8 @@ const ContactPage = () => {
     setError(null);
     
     try {
-      console.log('Submitting form to:', `${config.apiUrl}/contact`);
-      console.log('Form data:', formData);
+      // console.log('Submitting form to:', `${config.apiUrl}/contact`);
+      // console.log('Form data:', formData);
 
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
@@ -48,7 +48,7 @@ const ContactPage = () => {
       clearTimeout(timeoutId);
 
       const data = await response.json();
-      console.log('Response:', data);
+      // console.log('Response:', data);
 
       if (!response.ok) {
         throw new Error(data.message || 'Failed to submit form');
@@ -80,12 +80,28 @@ const ContactPage = () => {
 
   return (
     <>
-      <Hero
-        title="Contact Us"
-        subtitle="Get in touch with our team to discuss how we can help you achieve your goals."
-        image="https://images.pexels.com/photos/3184325/pexels-photo-3184325.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
-        size="md"
-      />
+           {/* ================= HERO (LCP OPTIMIZED) ================= */}
+      <div className="relative min-h-[70vh] flex items-center justify-center overflow-hidden">
+        <img
+          src="/contact-hero.webp"
+          alt="Contact OryFolks"
+          className="absolute inset-0 w-full h-full object-cover"
+          width={1400}
+          height={900}
+          loading="eager"
+          {...({ fetchpriority: 'high' } as any)}
+          decoding="async"
+        />
+        <div className="absolute inset-0 bg-primary-900/70" />
+        <div className="relative z-10 text-center px-6 max-w-4xl">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6">
+            Contact Us
+          </h1>
+          <p className="text-xl text-gray-200">
+            Get in touch with our team to discuss how we can help you.
+          </p>
+        </div>
+      </div>
 
       {/* Contact Information */}
       <Section background="white">
@@ -294,18 +310,18 @@ const ContactPage = () => {
           </p>
         </div>
 
-        <div className="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden shadow-xl border border-gray-100">
-          <iframe
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3864.199834495017!2d79.95345527042828!3d14.415640850770611!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3a4cf30054f61df3%3A0xfb15e6b1a0fc3d24!2sORYFOLKS%20Private%20Limited!5e0!3m2!1sen!2sin!4v1748537813418!5m2!1sen!2sin"
-            width="100%"
-            height="450"
-            style={{ border: 0 }}
-            allowFullScreen
-            loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
-            title="OryFolks Office Location"
-          ></iframe>
-        </div>
+        <div className="relative w-full pb-[56.25%] rounded-lg overflow-hidden shadow-xl border border-gray-100">
+  <iframe
+    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3864.199834495017!2d79.95345527042828!3d14.415640850770611!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3a4cf30054f61df3%3A0xfb15e6b1a0fc3d24!2sORYFOLKS%20Private%20Limited!5e0!3m2!1sen!2sin!4v1748537813418!5m2!1sen!2sin"
+    className="absolute inset-0 w-full h-full"
+    style={{ border: 0 }}
+    allowFullScreen
+    loading="lazy"
+    referrerPolicy="no-referrer-when-downgrade"
+    title="OryFolks Office Location"
+  />
+</div>
+
       </Section>
     </>
   );

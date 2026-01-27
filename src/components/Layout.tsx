@@ -1,26 +1,41 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import Header from './Header';
 import Footer from './Footer';
 import { AnimatePresence, motion } from 'framer-motion';
+import { useReducedMotion } from 'framer-motion';
 
 const Layout = () => {
   const { pathname } = useLocation();
   const [scrolled, setScrolled] = useState(false);
+  const prefersReducedMotion = useReducedMotion();
+  const [isFirstMount, setIsFirstMount] = useState(true);
+
+  const handleScroll = useCallback(() => {
+    const isScrolledNow = window.scrollY > 50;
+    setScrolled(prev => (isScrolledNow !== prev ? isScrolledNow : prev));
+  }, []);
 
   useEffect(() => {
-    const handleScroll = () => {
-      const isScrolled = window.scrollY > 50;
-      if (isScrolled !== scrolled) {
-        setScrolled(isScrolled);
+    // Throttle scroll events
+    let ticking = false;
+    const onScroll = () => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          handleScroll();
+          ticking = false;
+        });
+        ticking = true;
       }
     };
 
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [handleScroll]);
 
-    // Clean up event listener on unmount
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [scrolled]);
+  useEffect(() => {
+    setIsFirstMount(false);
+  }, []);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -34,9 +49,9 @@ const Layout = () => {
         <AnimatePresence mode="wait">
           <motion.div
             key={pathname}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
+            initial={!isFirstMount && { opacity: 0, y: 20 }}
+            animate={!isFirstMount && { opacity: 1, y: 0 }}
+            exit={!isFirstMount ? { opacity: 0, y: -20 } : undefined}
             transition={{ duration: 0.3 }}
             className="min-h-full"
           >

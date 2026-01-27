@@ -1,112 +1,50 @@
-import { ArrowRight, BarChart3, Users, Calendar, Globe, Building2, Microscope, Play } from 'lucide-react';
-import { motion, useInView } from 'framer-motion';
+import { ArrowRight, BarChart3, Users, Calendar } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
-import HeroCarousel from '../components/HeroCarousel';
 import Section from '../components/Section';
 import Card from '../components/Card';
 import Button from '../components/Button';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect,lazy,Suspense } from 'react';
+import { useNavigate } from 'react-router-dom';
+import StaticHero from '../components/StaticHero';
+import OptimizedImage from '../components/OptimizedImage';
+import LazySection from '../components/LazySection';
 
-// Video section with enhanced animations
-const VideoSection = () => {
-  const { t } = useTranslation();
-  const videoRef = useRef<HTMLVideoElement>(null);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            if (videoRef.current) {
-              videoRef.current.currentTime = 0;
-              videoRef.current.play();
-            }
-          } else {
-            if (videoRef.current) {
-              videoRef.current.pause();
-            }
-          }
-        });
-      },
-      { threshold: 0.5 }
-    );
-
-    if (videoRef.current) {
-      observer.observe(videoRef.current);
-    }
-
-    return () => observer.disconnect();
-  }, []);
-
-  return (
-    <motion.section
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6 }}
-      viewport={{ once: true }}
-      className="max-w-5xl mx-auto mt-6 px-6 text-center"
-    >
-      <motion.h2
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.2 }}
-        viewport={{ once: true }}
-        className="text-4xl md:text-5xl font-bold text-primary-800 mb-4 tracking-tight"
-      >
-        {t('story.title')}
-      </motion.h2>
-      <motion.p
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.3 }}
-        viewport={{ once: true }}
-        className="text-xl text-gray-600 mb-8 leading-relaxed"
-      >
-        {t('story.description')}
-      </motion.p>
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        whileInView={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.6, delay: 0.4 }}
-        viewport={{ once: true }}
-        className="relative max-w-3xl mx-auto rounded-2xl overflow-hidden shadow-2xl"
-      >
-        <video
-          ref={videoRef}
-          controls
-          className="w-full rounded-2xl"
-          preload="auto"
-          playsInline
-          onError={(e) => {
-            console.error('Video error:', e);
-            const video = e.target as HTMLVideoElement;
-            console.error('Video error details:', {
-              error: video.error,
-              networkState: video.networkState,
-              readyState: video.readyState
-            });
-          }}
-        >
-          <source src="/Ory.Video.mp4" type="video/mp4" />
-          Your browser does not support the video tag.
-        </video>
-      </motion.div>
-    </motion.section>
-  );
-};
+const HeroCarousel = lazy(() => import('../components/HeroCarousel'));
+const VideoSection = lazy(() => import('../components/VideoSection'));
 
 const HomePage = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const [showCarousel, setShowCarousel] = useState(false);
+
+useEffect(() => {
+  const timer = setTimeout(() => {
+    setShowCarousel(true);
+  }, 1500); // wait for first paint
+
+  return () => clearTimeout(timer);
+}, []);
+
   
   return (
     <>
       {/* Hero Carousel */}
-      <HeroCarousel />
+      {/* Hero (LCP optimized) */}
+{!showCarousel && <StaticHero />}
+
+{showCarousel && (
+  <Suspense fallback={<StaticHero />}>
+    <HeroCarousel />
+  </Suspense>
+)}
+
 
       {/* Video Section */}
       <Section background="light" className="pt-0">
-        <VideoSection />
+        <LazySection rootMargin="100px">
+          <VideoSection />
+        </LazySection>
       </Section>
 
       {/* Services Overview */}
@@ -164,11 +102,14 @@ const HomePage = () => {
             >
               <Card className="h-full flex flex-col hover:shadow-2xl transition-all duration-300 bg-white border border-gray-100 overflow-hidden rounded-2xl">
                 <div className="relative h-56 w-full">
-                  <img
-                    src={service.image}
-                    alt={service.imageAlt}
-                    className="w-full h-full object-cover"
-                  />
+                      <OptimizedImage
+                        src={service.image}
+                        alt={service.imageAlt}
+                        className="w-full h-full object-cover"
+                        width={800}
+                        height={350}
+                        loading="lazy"
+                      />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
                 </div>
                 <div className="p-8 flex flex-col h-full">
@@ -209,7 +150,7 @@ const HomePage = () => {
           ))}
         </div>
 
-        <motion.div
+            <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.3 }}
@@ -218,7 +159,7 @@ const HomePage = () => {
         >
           <Button
             variant="primary"
-            onClick={() => (window.location.href = '/services')}
+                onClick={() => navigate('/services')}
             className="hover:scale-105 transition-transform duration-300 text-lg px-8 py-3"
           >
             {t('services.viewAll')}
@@ -229,17 +170,20 @@ const HomePage = () => {
       {/* About Preview */}
       <Section background="secondary">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-          <motion.div
+            <motion.div
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
             className="relative"
           >
-            <img
+            <OptimizedImage
               src="https://images.pexels.com/photos/3183197/pexels-photo-3183197.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
               alt="Team members collaborating at OryFolks"
               className="rounded-2xl shadow-2xl w-full h-auto"
+              width={1260}
+              height={750}
+              loading="lazy"
             />
             <div className="absolute inset-0 bg-gradient-to-r from-primary-900/20 to-transparent rounded-2xl"></div>
           </motion.div>
@@ -425,10 +369,13 @@ const HomePage = () => {
               >
                 <div className="flex flex-col items-center text-center flex-grow">
                   <div className="h-20 md:h-24 flex items-center justify-center mb-6">
-                    <img 
+                    <OptimizedImage 
                       src={partner.logo} 
                       alt={`${partner.title} logo`}
                       className={`max-h-full w-auto object-contain ${partner.title === "Shigoto" ? "scale-75" : ""}`}
+                      width={160}
+                      height={80}
+                      loading="lazy"
                     />
                   </div>
                   <div className="flex flex-col flex-grow">

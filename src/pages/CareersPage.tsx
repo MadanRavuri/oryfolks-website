@@ -1,10 +1,9 @@
 import { useState } from 'react';
-import { ArrowRight, Code, Users, Phone, FileText, ChevronDown, MapPin, Clock, Briefcase } from 'lucide-react';
+import { ArrowRight, Code, Users, Phone, ChevronDown, MapPin, Clock, Briefcase } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import Hero from '../components/Hero';
 import Section from '../components/Section';
-import Card from '../components/Card';
 import Button from '../components/Button';
 import { useNavigate } from 'react-router-dom';
 import config from '../config';

@@ -1,33 +1,91 @@
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
+import { useRef, useEffect } from 'react';
 
 const VideoSection = () => {
+  const { t } = useTranslation();
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            if (videoRef.current) {
+              videoRef.current.currentTime = 0;
+              videoRef.current.play();
+            }
+          } else {
+            if (videoRef.current) {
+              videoRef.current.pause();
+            }
+          }
+        });
+      },
+      { threshold: 0.5 }
+    );
+
+    if (videoRef.current) {
+      observer.observe(videoRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <section className="py-12 bg-gray-100">
-      <motion.div
-        className="max-w-5xl mx-auto text-center px-6 md:px-0"
+    <motion.section
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6 }}
+      viewport={{ once: true }}
+      className="max-w-5xl mx-auto mt-6 px-6 text-center"
+    >
+      <motion.h2
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.2 }}
         viewport={{ once: true }}
-        transition={{ duration: 0.6 }}
+        className="text-4xl md:text-5xl font-bold text-primary-800 mb-4 tracking-tight"
       >
-        <h2 className="text-3xl md:text-4xl font-bold text-primary-800 mb-6">
-          Learn More About Our Mission
-        </h2>
-        <p className="text-lg text-gray-700 mb-10 max-w-3xl mx-auto">
-          Watch our story and see how we empower communities through innovation.
-        </p>
-        <div className="aspect-w-16 aspect-h-9 rounded-xl overflow-hidden shadow-lg mx-auto max-w-4xl">
-          <iframe
-            src="https://www.youtube.com/embed/dQw4w9WgXcQ"
-            title="OryFolks Video"
-            frameBorder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-            className="w-full h-full"
-          />
-        </div>
+        {t('story.title')}
+      </motion.h2>
+      <motion.p
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.3 }}
+        viewport={{ once: true }}
+        className="text-xl text-gray-600 mb-8 leading-relaxed"
+      >
+        {t('story.description')}
+      </motion.p>
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        whileInView={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.6, delay: 0.4 }}
+        viewport={{ once: true }}
+        className="relative max-w-3xl mx-auto rounded-2xl overflow-hidden shadow-2xl"
+      >
+        <video
+          ref={videoRef}
+          controls
+          className="w-full rounded-2xl"
+          preload="none"
+          playsInline
+          onError={(e) => {
+            console.error('Video error:', e);
+            const video = e.target as HTMLVideoElement;
+            console.error('Video error details:', {
+              error: video.error,
+              networkState: video.networkState,
+              readyState: video.readyState
+            });
+          }}
+        >
+          <source src="/Ory.Video.mp4" type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
       </motion.div>
-    </section>
+    </motion.section>
   );
 };
 

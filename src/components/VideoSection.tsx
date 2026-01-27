@@ -1,28 +1,38 @@
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 
 const VideoSection = () => {
   const { t } = useTranslation();
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [isVideoLoaded, setIsVideoLoaded] = useState(false);
+  const [hasStartedLoading, setHasStartedLoading] = useState(false);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting) {
+          if (entry.isIntersecting && !hasStartedLoading) {
+            setHasStartedLoading(true);
+            if (videoRef.current) {
+              // Start loading the video when it comes into view
+              videoRef.current.load();
+            }
+          }
+          
+          if (entry.isIntersecting && isVideoLoaded) {
             if (videoRef.current) {
               videoRef.current.currentTime = 0;
-              videoRef.current.play();
+              videoRef.current.play().catch(e => {
+                console.log('Autoplay prevented:', e);
+              });
             }
-          } else {
-            if (videoRef.current) {
-              videoRef.current.pause();
-            }
+          } else if (!entry.isIntersecting && videoRef.current) {
+            videoRef.current.pause();
           }
         });
       },
-      { threshold: 0.5 }
+      { threshold: 0.3, rootMargin: '100px' } // Load earlier and trigger sooner
     );
 
     if (videoRef.current) {
@@ -30,7 +40,19 @@ const VideoSection = () => {
     }
 
     return () => observer.disconnect();
-  }, []);
+  }, [isVideoLoaded, hasStartedLoading]);
+
+  const handleVideoLoad = () => {
+    setIsVideoLoaded(true);
+  };
+
+  const handleCanPlay = () => {
+    if (videoRef.current && hasStartedLoading) {
+      videoRef.current.play().catch(e => {
+        console.log('Autoplay prevented:', e);
+      });
+    }
+  };
 
   return (
     <motion.section
@@ -63,14 +85,29 @@ const VideoSection = () => {
         whileInView={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.6, delay: 0.4 }}
         viewport={{ once: true }}
-        className="relative max-w-3xl mx-auto rounded-2xl overflow-hidden shadow-2xl"
+        className="relative max-w-3xl mx-auto rounded-2xl overflow-hidden shadow-2xl bg-gray-100"
       >
+        {/* Loading placeholder */}
+        {!isVideoLoaded && (
+          <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
+              <p className="text-gray-600">Loading video...</p>
+            </div>
+          </div>
+        )}
+        
         <video
           ref={videoRef}
           controls
-          className="w-full rounded-2xl"
-          preload="none"
+          className={`w-full rounded-2xl transition-opacity duration-300 ${
+            isVideoLoaded ? 'opacity-100' : 'opacity-0'
+          }`}
+          preload="metadata"
           playsInline
+          onLoadStart={() => console.log('Video loading started')}
+          onLoadedData={handleVideoLoad}
+          onCanPlay={handleCanPlay}
           onError={(e) => {
             console.error('Video error:', e);
             const video = e.target as HTMLVideoElement;

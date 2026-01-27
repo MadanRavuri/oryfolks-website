@@ -50,7 +50,7 @@ const BotVisionPage = () => {
       <Hero
         title={t('services.botVision.hero.title')}
         subtitle={t('services.botVision.hero.subtitle')}
-        image="/Bot.jpg"
+        image="/bot-vision.webp"
         size="lg"
       />
 

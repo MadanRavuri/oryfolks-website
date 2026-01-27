@@ -50,7 +50,7 @@ const ITStaffingPage = () => {
       <Hero
         title={t('services.itStaffing.hero.title')}
         subtitle={t('services.itStaffing.hero.subtitle')}
-        image="/contactbased.jpg"
+        image="/it-staffing.webp"
         size="lg"
       />
 

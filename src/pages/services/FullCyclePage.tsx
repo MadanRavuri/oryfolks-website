@@ -47,7 +47,7 @@ const FullCyclePage = () => {
       <Hero
         title="Full Cycle Development"
         subtitle="Comprehensive software development solutions from concept to deployment"
-        image="/fullcycle.jpg"
+        image="/full-cycle.webp"
         size="lg"
       />
 

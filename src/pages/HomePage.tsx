@@ -70,7 +70,7 @@ useEffect(() => {
               icon: <Users className="text-primary-600" size={36} />,
               title: t('services.fullTime.title'),
               description: t('services.fullTime.description'),
-              image: "/Bot.jpg",
+              image: "/bot-vision.webp",
               imageAlt: "Bot Vision Services",
               link: "/services/bot-vision"
             },
@@ -78,7 +78,7 @@ useEffect(() => {
               icon: <Calendar className="text-primary-600" size={36} />,
               title: t('services.contract.title'),
               description: t('services.contract.description'),
-              image: "/contactbased.jpg",
+              image: "/it-staffing.webp",
               imageAlt: "Contact-based Services",
               link: "/services/it-staffing"
             },
@@ -86,7 +86,7 @@ useEffect(() => {
               icon: <BarChart3 className="text-primary-600" size={36} />,
               title: "Full Cycle Services",
               description: t('services.project.description'),
-              image: "/fullcycle.jpg",
+              image: "/full-cycle.webp",
               imageAlt: "Full Cycle Services",
               link: "/services/full-cycle"
             },

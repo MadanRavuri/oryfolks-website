@@ -34,16 +34,33 @@
     <meta name="twitter:description" content="OryFolks - A premier organization dedicated to community development and innovative solutions." />
     <meta name="twitter:image" content="/oryfolkslogo1.png" />
 
+    <!-- Critical CSS Preload -->
+    <link rel="preload" href="/src/index.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="/src/index.css"></noscript>
+    
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
       rel="stylesheet"
+      media="print" onload="this.media='all'"
     />
+    <noscript>
+      <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet"
+      />
+    </noscript>
 
     <!-- DNS Prefetch -->
     <link rel="dns-prefetch" href="//images.pexels.com" />
+    
+    <!-- Preload critical hero images -->
+    <link rel="preload" as="image" href="/homepage.webp" type="image/webp">
+    <link rel="preload" as="image" href="/services-hero.webp" type="image/webp">
+    <link rel="preload" as="image" href="/about-hero.webp" type="image/webp">
+    <link rel="preload" as="image" href="/contact-hero.webp" type="image/webp">
 
     <!-- Structured Data -->
     <script type="application/ld+json">

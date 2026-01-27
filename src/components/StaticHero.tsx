@@ -2,7 +2,7 @@ const StaticHero = () => {
   return (
     <div className="relative h-[600px] overflow-hidden">
       <img
-        src="/homepage.webp"   // convert homepage.jpg → homepage.webp
+        src="/homepage.webp"
         alt="Welcome to OryFolks"
         className="w-full h-full object-cover"
         loading="eager"
@@ -10,6 +10,10 @@ const StaticHero = () => {
         width={1600}
         height={900}
         {...({ fetchpriority: 'high' } as any)}
+        style={{
+          contentVisibility: 'auto',
+          containIntrinsicSize: '1600px 900px'
+        }}
       />
 
       <div className="absolute inset-0 bg-black/50" />

@@ -265,7 +265,11 @@ const CareersPage = () => {
             <img
               src="https://images.pexels.com/photos/3184328/pexels-photo-3184328.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
               alt="OryFolks team"
-                className="rounded-xl shadow-xl w-full h-auto"
+              className="rounded-xl shadow-xl w-full h-auto"
+              width={1260}
+              height={750}
+              loading="lazy"
+              decoding="async"
             />
             </div>
           </div>

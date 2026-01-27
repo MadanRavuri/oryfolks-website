@@ -70,7 +70,7 @@ useEffect(() => {
               icon: <Users className="text-primary-600" size={36} />,
               title: t('services.fullTime.title'),
               description: t('services.fullTime.description'),
-              image: "/bot-vision.webp",
+              image: "/Bot.webp",
               imageAlt: "Bot Vision Services",
               link: "/services/bot-vision"
             },
@@ -78,7 +78,7 @@ useEffect(() => {
               icon: <Calendar className="text-primary-600" size={36} />,
               title: t('services.contract.title'),
               description: t('services.contract.description'),
-              image: "/it-staffing.webp",
+              image: "/contactbased.webp",
               imageAlt: "Contact-based Services",
               link: "/services/it-staffing"
             },
@@ -86,7 +86,7 @@ useEffect(() => {
               icon: <BarChart3 className="text-primary-600" size={36} />,
               title: "Full Cycle Services",
               description: t('services.project.description'),
-              image: "/full-cycle.webp",
+              image: "/fullcycle.webp",
               imageAlt: "Full Cycle Services",
               link: "/services/full-cycle"
             },
@@ -178,7 +178,7 @@ useEffect(() => {
             className="relative"
           >
             <OptimizedImage
-              src="https://images.pexels.com/photos/3183197/pexels-photo-3183197.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
+              src="/home-sec.webp"
               alt="Team members collaborating at OryFolks"
               className="rounded-2xl shadow-2xl w-full h-auto"
               width={1260}
@@ -335,25 +335,25 @@ useEffect(() => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
             {[
               {
-                logo: "/ideal-1.png",
+                logo: "/ideal-1.webp",
                 title: "Ideal Folks",
                 description: "A leading provider of end-to-end IT services and executive search for Global companies, with a primary focus on Japan.",
                 link: "https://www.idealfolks.com/"
               },
               {
-                logo: "/icro_a.png",
+                logo: "/icro_a.webp",
                 title: "iCRO",
                 description: "A division of Ideal Folks LLC and its Tokyo-based Clinical Research Partner that provides Clinical Research services in APAC.",
                 link: "https://www.icro.com"
               },
               {
-                logo: "/shinka_a.png",
+                logo: "/shinka_a.webp",
                 title: "Shinka",
                 description: "A world-class IT consulting, services, and solution provider that combines business processing experience with innovative technologies.",
                 link: "https://shinkas.com/"
               },
               {
-                logo: "/shigoto.png",
+                logo: "/shigoto.webp",
                 title: "Shigoto",
                 description: "A leading consultancy service provider delivering innovative tech solutions and helping businesses express their vision effectively.",
                 link: "https://www.shigoto.io/partners/"

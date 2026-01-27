@@ -169,10 +169,14 @@ const EventsPage = () => {
               <Card className="overflow-hidden">
                 <div className="grid grid-cols-1 md:grid-cols-3 h-full">
                   <div className="h-64 md:h-auto">
-                    <img
+            <img
                       src={event.image}
                       alt={event.title}
                       className="w-full h-full object-cover"
+                      width={400}
+                      height={300}
+                      loading="lazy"
+                      decoding="async"
                     />
                   </div>
                   <div className="col-span-2 p-6">
@@ -245,6 +249,10 @@ const EventsPage = () => {
               src="https://images.pexels.com/photos/2833037/pexels-photo-2833037.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
               alt="Annual Innovation Summit"
               className="rounded-lg shadow-xl w-full h-auto"
+              width={1260}
+              height={750}
+              loading="lazy"
+              decoding="async"
             />
           </motion.div>
           
@@ -329,6 +337,10 @@ const EventsPage = () => {
                     src={event.image}
                     alt={event.title}
                     className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                    width={400}
+                    height={300}
+                    loading="lazy"
+                    decoding="async"
                   />
                 </div>
                 <div className="p-6">

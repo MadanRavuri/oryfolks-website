@@ -72,8 +72,8 @@ const AboutPage = () => {
               src="/about-hero.webp"
               alt="OryFolks team"
               className="rounded-xl shadow-2xl w-full h-auto"
-              width={1400}
-              height={900}
+              width={1260}
+              height={750}
               loading="lazy"
               decoding="async"
             />

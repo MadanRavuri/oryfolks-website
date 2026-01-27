@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { Phone, Mail, MapPin, Facebook, Twitter, Instagram, Linkedin } from 'lucide-react';
+import { Facebook, Twitter, Linkedin, Instagram } from 'lucide-react';
 
 const Footer = () => {
   return (
@@ -11,9 +11,13 @@ const Footer = () => {
             <NavLink to="/" className="inline-flex items-center gap-2 mb-4">
               <div className="bg-white p-2 rounded-lg">
                 <img 
-                  src="/logo.jpg" 
+                  src="/logo.webp" 
                   alt="OryFolks Logo" 
                   className="h-8 w-auto object-contain"
+                  width={32}
+                  height={32}
+                  loading="eager"
+                  decoding="async"
                 />
               </div>
             </NavLink>

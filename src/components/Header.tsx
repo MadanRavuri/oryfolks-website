@@ -61,9 +61,13 @@ const Header = ({ scrolled }: HeaderProps) => {
         <NavLink to="/" className="flex items-center gap-2">
           <div className="flex items-center">
             <img 
-              src="/logo.jpg" 
+              src="/logo.webp" 
               alt="OryFolks Logo" 
               className="h-10 w-auto object-contain"
+              width={40}
+              height={40}
+              loading="eager"
+              decoding="async"
             />
           </div>
         </NavLink>

@@ -2,11 +2,14 @@ import { useState, useEffect, useCallback } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import Header from './Header';
 import Footer from './Footer';
+import ChatBot from './ChatBot';
+import { useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useReducedMotion } from 'framer-motion';
 
 const Layout = () => {
   const { pathname } = useLocation();
+  const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
   const prefersReducedMotion = useReducedMotion();
   const [isFirstMount, setIsFirstMount] = useState(true);
@@ -59,6 +62,41 @@ const Layout = () => {
           </motion.div>
         </AnimatePresence>
       </main>
+
+      {/* ChatBot mounted globally */}
+      <ChatBot
+        onNavigate={(page: string) => {
+          switch (page) {
+            case 'services':
+              navigate('/services');
+              break;
+            case 'contact':
+              navigate('/contact');
+              break;
+            case 'careers':
+              navigate('/careers');
+              break;
+            case 'about':
+              navigate('/about');
+              break;
+            case 'navigate_services':
+              navigate('/services');
+              break;
+            case 'navigate_contact':
+              navigate('/contact');
+              break;
+            case 'navigate_career':
+              navigate('/careers');
+              break;
+            case 'navigate_about':
+              navigate('/about');
+              break;
+            default:
+              // If the page isn't mapped, try navigating to root
+              navigate('/');
+          }
+        }}
+      />
 
       <Footer />
     </div>

@@ -277,6 +277,76 @@ app.get('/api/resumes', async (req, res) => {
   }
 });
 
+// Simple jobs endpoint (returns mock data). Supports optional ?status=OPEN
+app.get('/api/jobs', async (req, res) => {
+  try {
+    const status = (req.query.status as string) || 'OPEN';
+
+    // Mocked job listings for the frontend chatbot. Replace with DB queries when available.
+    const allJobs = [
+      {
+        _id: 'job_1',
+        role: 'Software Engineer',
+        location: 'Nellore, India',
+        type: 'Full-time',
+        department: 'Engineering',
+        salary: 'Competitive',
+        status: 'OPEN'
+      },
+      {
+        _id: 'job_2',
+        role: 'HR Executive',
+        location: 'Nellore, India',
+        type: 'Full-time',
+        department: 'Human Resources',
+        salary: 'Competitive',
+        status: 'OPEN'
+      },
+      {
+        _id: 'job_3',
+        role: 'Receptionist / Admin',
+        location: 'Nellore, India',
+        type: 'Full-time',
+        department: 'Administration',
+        salary: 'TBD',
+        status: 'OPEN'
+      }
+    ];
+
+    const filtered = allJobs.filter(j => j.status === status);
+    res.json(filtered.length ? filtered : []);
+  } catch (error) {
+    console.error('Error fetching jobs:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Simple about endpoint (returns mock about/contact data)
+app.get('/api/about', (_req, res) => {
+  try {
+    const about = {
+      companyInfo: {
+        mission: 'Bridge Japan and India through technology, language, and inclusive talent.',
+        vision: 'Enable cross-border collaboration by connecting people and technology across regions.',
+        description: 'oryfolks connects Japanese businesses with Indian engineering talent and language services to enable cross-border collaboration and innovation',
+        foundedYear: 2025,
+        teamSize: '10-50',
+        headquarters: 'Nellore, India'
+      },
+      contactInfo: {
+        email: 'info@oryfolks.com',
+        phone: '+91 0861-4500024',
+        address: 'Plot No. 25/11/23, Savithri Nagar 3rd street, Vedayapalem, Nellore 524004',
+        mapUrl: ''
+      }
+    };
+    res.json(about);
+  } catch (error) {
+    console.error('Error fetching about data:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // Error handling middleware
 app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
   console.error('Error in middleware:', err);

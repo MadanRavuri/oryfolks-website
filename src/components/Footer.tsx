@@ -21,42 +21,18 @@ const Footer = () => {
                 />
               </div>
             </NavLink>
-            <p className="text-gray-300 mb-4">
+            <p className="text-gray-300 mb-6">
               Empowering communities through innovative solutions and dedicated service.
             </p>
-            <div className="flex gap-4">
-              <a 
-                href="https://www.facebook.com/oryfolks" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-gray-300 hover:text-secondary-500 transition-colors"
-              >
-                <Facebook size={20} />
-              </a>
-              <a 
-                href="https://twitter.com/oryfolks" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-gray-300 hover:text-secondary-500 transition-colors"
-              >
-                <Twitter size={20} />
-              </a>
-              <a 
-                href="https://www.instagram.com/oryfolks" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-gray-300 hover:text-secondary-500 transition-colors"
-              >
-                <Instagram size={20} />
-              </a>
-              <a 
-                href="https://www.linkedin.com/company/oryfolks" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-gray-300 hover:text-secondary-500 transition-colors"
-              >
-                <Linkedin size={20} />
-              </a>
+            <div className="mb-4">
+              <h4 className="text-secondary-500 font-semibold mb-3 text-sm">ISO Certified Company</h4>
+              <img 
+                src="/ISO.jpeg"  
+                alt="ISO 27001 Certified" 
+                className="h-40 w-auto object-contain hover:scale-105 transition-transform"
+                loading="lazy"
+                decoding="async"
+              />
             </div>
           </div>
 
@@ -141,6 +117,41 @@ const Footer = () => {
                   className="text-gray-300 hover:text-secondary-500 transition-colors text-base"
                 >
                   info@oryfolks.com
+                </a>
+              </div>
+              
+              <div className="flex gap-4">
+                <a 
+                  href="https://www.facebook.com/oryfolks" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center w-12 h-12 rounded-full border-2 border-gray-500 text-gray-300 hover:border-secondary-500 hover:text-secondary-500 transition-colors"
+                >
+                  <Facebook size={20} />
+                </a>
+                <a 
+                  href="https://twitter.com/oryfolks" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center w-12 h-12 rounded-full border-2 border-gray-500 text-gray-300 hover:border-secondary-500 hover:text-secondary-500 transition-colors"
+                >
+                  <Twitter size={20} />
+                </a>
+                <a 
+                  href="https://www.instagram.com/oryfolks" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center w-12 h-12 rounded-full border-2 border-gray-500 text-gray-300 hover:border-secondary-500 hover:text-secondary-500 transition-colors"
+                >
+                  <Instagram size={20} />
+                </a>
+                <a 
+                  href="https://www.linkedin.com/company/oryfolks" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center w-12 h-12 rounded-full border-2 border-gray-500 text-gray-300 hover:border-secondary-500 hover:text-secondary-500 transition-colors"
+                >
+                  <Linkedin size={20} />
                 </a>
               </div>
             </div>

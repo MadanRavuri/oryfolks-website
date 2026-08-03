@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ArrowRight, Code, Users, Phone, ChevronDown, MapPin, Clock, Briefcase } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
@@ -8,10 +8,43 @@ import Button from '../components/Button';
 import { useNavigate } from 'react-router-dom';
 import config from '../config';
 
+interface RecruitaiJob {
+  id?: string;
+  title?: string;
+  description?: string;
+  company?: string;
+  location?: string;
+  department?: string;
+  salary?: string;
+  experienceLevel?: string;
+  hiringManager?: string | null;
+  skills?: Array<{ name: string; weight?: number }>;
+  education?: string[];
+  industry?: string;
+  benefits?: string[];
+  requirements?: string[];
+  responsibilities?: string[];
+  remote?: boolean;
+  deadline?: string;
+  status?: string;
+  publishedToCareers?: boolean;
+  applicants?: number;
+  createdAt?: string;
+  updatedAt?: string;
+  minExperience?: number;
+  educationRequirement?: string;
+  requiredSkills?: string[];
+  employmentType?: string;
+  postedDate?: string;
+}
+
 const CareersPage = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [selectedJob, setSelectedJob] = useState<number | null>(null);
+  const [jobs, setJobs] = useState<RecruitaiJob[]>([]);
+  const [isLoadingJobs, setIsLoadingJobs] = useState(true);
+  const [jobsError, setJobsError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -80,134 +113,107 @@ const CareersPage = () => {
     }
   };
 
-  const jobPositions = [
-    {
-      category: 'Engineering',
-      icon: <Code className="text-secondary-500" size={40} />,
-      title: t('careers.roles.engineer.title'),
-      type: t('careers.roles.engineer.type'),
-      location: "Nellore, India",
-      employmentType: "Full-time",
-      experience: "0-3 years",
-      description: t('careers.roles.engineer.description'),
-      responsibilities: [
-        'Develop and maintain high-quality software solutions',
-        'Collaborate with cross-functional teams',
-        'Write clean, efficient, and maintainable code',
-        'Participate in code reviews and technical discussions',
-        'Troubleshoot and debug complex issues',
-        'Stay updated with emerging technologies'
-      ],
-      requirements: [
-        'Bachelor\'s degree in Computer Science or related field',
-        '0-3 years of software development experience',
-        'Strong problem-solving skills',
-        'Knowledge of modern programming languages',
-        'Good communication skills',
-        'Eagerness to learn and grow'
-      ],
-      skills: [
-        'JavaScript/TypeScript',
-        'React/Angular/Vue',
-        'Node.js',
-        'Python/Java',
-        'SQL/NoSQL databases',
-        'Git version control'
-      ],
-      benefits: [
-        'Competitive salary',
-        'Health insurance',
-        'Flexible working hours',
-        'Professional development',
-        'Team building activities',
-        'International exposure'
-      ]
-    },
-    {
-      category: 'Human Resources',
-      icon: <Users className="text-secondary-500" size={40} />,
-      title: t('careers.roles.hr.title'),
-      type: t('careers.roles.hr.type'),
-      location: "Nellore, India",
-      employmentType: "Full-time",
-      experience: "0-3 years",
-      description: t('careers.roles.hr.description'),
-      responsibilities: [
-        'Manage recruitment and hiring processes',
-        'Handle employee relations and engagement',
-        'Develop and implement HR policies',
-        'Coordinate training and development programs',
-        'Manage performance review processes',
-        'Ensure compliance with labor laws'
-      ],
-      requirements: [
-        'Bachelor\'s degree in HR or related field',
-        '0-3 years of HR experience',
-        'Knowledge of HR processes and practices',
-        'Strong interpersonal skills',
-        'Good organizational abilities',
-        'Proficiency in HR software'
-      ],
-      skills: [
-        'HR Management',
-        'Recruitment',
-        'Employee Relations',
-        'HR Policies',
-        'Training & Development',
-        'HR Software'
-      ],
-      benefits: [
-        'Competitive salary',
-        'Health insurance',
-        'Professional development',
-        'Work-life balance',
-        'Team activities',
-        'Career growth'
-      ]
-    },
-    {
-      category: 'Administration',
-      icon: <Phone className="text-secondary-500" size={40} />,
-      title: t('careers.roles.receptionist.title'),
-      type: t('careers.roles.receptionist.type'),
-      location: "Nellore, India",
-      employmentType: "Full-time",
-      experience: "0-3 years",
-      description: t('careers.roles.receptionist.description'),
-      responsibilities: [
-        'Greet and assist visitors',
-        'Manage phone calls and emails',
-        'Handle office supplies and inventory',
-        'Coordinate meetings and appointments',
-        'Maintain office cleanliness',
-        'Support administrative tasks'
-      ],
-      requirements: [
-        'High school diploma or equivalent',
-        '0-3 years of receptionist experience',
-        'Excellent communication skills',
-        'Proficiency in MS Office',
-        'Professional appearance and demeanor',
-        'Strong organizational skills'
-      ],
-      skills: [
-        'Customer Service',
-        'Communication',
-        'MS Office',
-        'Organization',
-        'Multitasking',
-        'Problem Solving'
-      ],
-      benefits: [
-        'Competitive salary',
-        'Health insurance',
-        'Regular hours',
-        'Professional environment',
-        'Team support',
-        'Growth opportunities'
-      ]
-    }
-  ];
+  useEffect(() => {
+    let isMounted = true;
+    const controller = new AbortController();
+
+    const fetchJobs = async () => {
+      try {
+        setIsLoadingJobs(true);
+        setJobsError(null);
+
+        const response = await fetch(config.recruitaiApiUrl, { signal: controller.signal });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch jobs');
+        }
+
+        const payload = await response.json();
+        const normalizedJobs = Array.isArray(payload)
+          ? payload
+          : Array.isArray(payload?.value)
+            ? payload.value
+            : [];
+
+        if (!isMounted) {
+          return;
+        }
+
+        setJobs(normalizedJobs.filter((job: RecruitaiJob) => job.publishedToCareers !== false));
+      } catch (error) {
+        if (controller.signal.aborted || !isMounted) {
+          return;
+        }
+
+        console.error('Error fetching jobs:', error);
+        setJobsError('Unable to load live openings right now. Please check back soon.');
+        setJobs([]);
+      } finally {
+        if (isMounted) {
+          setIsLoadingJobs(false);
+        }
+      }
+    };
+
+    fetchJobs();
+
+    return () => {
+      isMounted = false;
+      controller.abort();
+    };
+  }, []);
+
+  const jobPositions = jobs.map((job, index) => {
+    const responsibilities = job.responsibilities?.length
+      ? job.responsibilities
+      : [
+          `Contribute to ${job.department || 'team'} goals`,
+          'Collaborate with cross-functional teams',
+          'Help deliver high-quality outcomes',
+        ];
+
+    const requirements = job.requirements?.length
+      ? job.requirements
+      : [
+          job.educationRequirement || 'Relevant academic background',
+          job.minExperience ? `${job.minExperience}+ years of experience` : 'Relevant professional experience',
+          job.requiredSkills?.length ? `Skills: ${job.requiredSkills.join(', ')}` : 'Strong problem-solving skills',
+        ];
+
+    const skills = job.requiredSkills?.length
+      ? job.requiredSkills
+      : job.skills?.map((skill) => skill.name) || [];
+
+    const benefits = job.benefits?.length
+      ? job.benefits
+      : ['Growth opportunities', 'Collaborative work environment'];
+
+    const normalizedDepartment = (job.department || job.industry || 'Open Role').toLowerCase();
+
+    return {
+      id: job.id || `job-${index}`,
+      category: job.department || job.industry || 'Open Role',
+      icon: normalizedDepartment.includes('hr')
+        ? <Users className="text-secondary-500" size={40} />
+        : normalizedDepartment.includes('admin')
+          ? <Phone className="text-secondary-500" size={40} />
+          : <Code className="text-secondary-500" size={40} />,
+      title: job.title || 'Open Position',
+      type: job.experienceLevel || job.employmentType || 'Open Role',
+      location: job.location || 'Remote / Flexible',
+      employmentType: job.employmentType || 'Full-time',
+      experience: job.minExperience ? `${job.minExperience}+ years` : job.experienceLevel || 'Experience varies',
+      description: job.description || 'A new opportunity with OryFolks.',
+      responsibilities,
+      requirements,
+      skills,
+      benefits,
+      salary: job.salary,
+      status: job.status,
+      deadline: job.deadline,
+      postedDate: job.postedDate,
+    };
+  });
 
   const toggleJobDetails = (index: number) => {
     setSelectedJob(selectedJob === index ? null : index);
@@ -317,10 +323,23 @@ const CareersPage = () => {
           </p>
         </div>
 
-        <div className="space-y-6">
+        {isLoadingJobs ? (
+          <div className="rounded-xl border border-gray-100 bg-gray-50 p-8 text-center text-gray-600">
+            Loading live openings...
+          </div>
+        ) : jobsError ? (
+          <div className="rounded-xl border border-amber-200 bg-amber-50 p-8 text-center text-amber-700">
+            {jobsError}
+          </div>
+        ) : jobPositions.length === 0 ? (
+          <div className="rounded-xl border border-gray-100 bg-gray-50 p-8 text-center text-gray-600">
+            No openings are available right now. Please check back soon.
+          </div>
+        ) : (
+          <div className="space-y-6">
             {jobPositions.map((position, index) => (
             <motion.div
-                key={index}
+                key={position.id || index}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
@@ -344,7 +363,7 @@ const CareersPage = () => {
                           {position.title}
                         </h3>
                         <p className="text-gray-600 italic mb-3">{position.type}</p>
-                        <div className="flex items-center gap-4 text-sm text-gray-500">
+                        <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500">
                           <div className="flex items-center gap-2">
                             <MapPin size={16} />
                             <span>{position.location}</span>
@@ -357,6 +376,11 @@ const CareersPage = () => {
                             <Clock size={16} />
                             <span>{position.experience}</span>
                           </div>
+                          {position.salary ? (
+                            <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600">
+                              Salary: {position.salary}
+                            </span>
+                          ) : null}
                         </div>
                       </div>
                     </div>
@@ -443,7 +467,8 @@ const CareersPage = () => {
                 </AnimatePresence>
             </motion.div>
           ))}
-        </div>
+          </div>
+        )}
 
           <div className="text-center mt-8">
             <p className="text-gray-600 text-lg mb-4">

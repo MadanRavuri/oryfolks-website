@@ -159,27 +159,35 @@ app.post('/api/resume', upload.single('resumeFile'), async (req: Request, res: R
       // Continue with the response even if email fails
     }
 
-    // 🚀 Forward candidate to RecruitAI ATS
+    // 🚀 Forward Candidate to RecruitAI ATS
     try {
       const recruitAiUrl = process.env.RECRUITAI_API_URL || 'https://recruitai-backend-bvo0.onrender.com';
+
+      // Cleanly parse comma-separated skills into an array
+      const skillsList = req.body.skills
+        ? (Array.isArray(req.body.skills) ? req.body.skills : String(req.body.skills).split(',').map((s: string) => s.trim()).filter(Boolean))
+        : [];
+
+      // Extract numeric years (e.g. "4 years" -> 4)
+      const expNumber = parseFloat(String(req.body.experience).replace(/[^0-9.]/g, '')) || 0;
+
       await fetch(`${recruitAiUrl}/api/candidates`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: req.body.name,
           email: req.body.email,
-          phone: req.body.phone,
-          role: req.body.position,
-          skills: req.body.skills
-            ? (Array.isArray(req.body.skills) ? req.body.skills : req.body.skills.split(','))
-            : [],
-          experience: parseFloat(req.body.experience) || 0,
+          phone: req.body.phone || '',
+          role: req.body.position || 'Professional',
+          skills: skillsList,
+          experience: expNumber,
+          education: req.body.education ? [String(req.body.education)] : [],
           source: 'Careers Portal'
         })
       });
-      console.log('✅ Candidate forwarded to RecruitAI ATS');
+      console.log('✅ Candidate successfully forwarded to RecruitAI ATS');
     } catch (forwardErr: any) {
-      console.warn('⚠️ RecruitAI forwarding error:', forwardErr.message);
+      console.warn('⚠️ RecruitAI forwarding skipped/error:', forwardErr?.message);
     }
 
     res.status(201).json(savedResume);
